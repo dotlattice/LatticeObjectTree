@@ -124,6 +124,8 @@ publish/
 
 # NuGet Packages Directory
 packages/
+.nuget/NuGet.exe
+*.nupkg
 ## TODO: If the tool you use requires repositories.config uncomment the next line
 #!packages/repositories.config
 
@@ -172,3 +174,8 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# Mercurial
+.hg/
+.hgignore
+*.orig
