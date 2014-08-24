@@ -24,91 +24,91 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
         public void GenerateCode_Integer()
         {
             var code = codeGenerator.GenerateCode(2);
-            Assert.AreEqual("2", code);
+            CodeAssertAreEqual("2", code);
         }
 
         [Test]
         public void GenerateCode_Decimal()
         {
             var code = codeGenerator.GenerateCode(2.2m);
-            Assert.AreEqual("2.2m", code);
+            CodeAssertAreEqual("2.2m", code);
         }
 
         [Test]
         public void GenerateCode_Float()
         {
             var code = codeGenerator.GenerateCode(2.2f);
-            Assert.AreEqual("2.2f", code);
+            CodeAssertAreEqual("2.2f", code);
         }
 
         [Test]
         public void GenerateCode_Double()
         {
             var code = codeGenerator.GenerateCode(123456789.12345678);
-            Assert.AreEqual("123456789.12345678d", code);
+            CodeAssertAreEqual("123456789.12345678d", code);
         }
 
         [Test]
         public void GenerateCode_String()
         {
             var code = codeGenerator.GenerateCode("Hello world!");
-            Assert.AreEqual("\"Hello world!\"", code);
+            CodeAssertAreEqual("\"Hello world!\"", code);
         }
 
         [Test]
         public void GenerateCode_String_EmptyString()
         {
             var code = codeGenerator.GenerateCode("");
-            Assert.AreEqual("\"\"", code);
+            CodeAssertAreEqual("\"\"", code);
         }
 
         [Test]
         public void GenerateCode_Guid()
         {
             var code = codeGenerator.GenerateCode(new Guid("160dd6f7-9901-4a6e-9379-867dae92de28"));
-            Assert.AreEqual("new Guid(\"160dd6f7-9901-4a6e-9379-867dae92de28\")", code);
+            CodeAssertAreEqual("new Guid(\"160dd6f7-9901-4a6e-9379-867dae92de28\")", code);
         }
 
         [Test]
         public void GenerateCode_DateTime_NoTime()
         {
             var code = codeGenerator.GenerateCode(new DateTime(1970, 1, 1));
-            Assert.AreEqual("new DateTime(1970, 1, 1)", code);
+            CodeAssertAreEqual("new DateTime(1970, 1, 1)", code);
         }
 
         [Test]
         public void GenerateCode_DateTime_TimeWithoutMilliseconds()
         {
             var code = codeGenerator.GenerateCode(new DateTime(1970, 1, 1, 1, 2, 3, 0));
-            Assert.AreEqual("new DateTime(1970, 1, 1, 1, 2, 3)", code);
+            CodeAssertAreEqual("new DateTime(1970, 1, 1, 1, 2, 3)", code);
         }
 
         [Test]
         public void GenerateCode_DateTime_TimeWitMilliseconds()
         {
             var code = codeGenerator.GenerateCode(new DateTime(1970, 1, 1, 1, 2, 3, 4));
-            Assert.AreEqual("new DateTime(1970, 1, 1, 1, 2, 3, 4)", code);
+            CodeAssertAreEqual("new DateTime(1970, 1, 1, 1, 2, 3, 4)", code);
         }
 
         [Test]
         public void GenerateCode_DateTimeOffset_NoTime()
         {
             var code = codeGenerator.GenerateCode(new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-4)));
-            Assert.AreEqual("new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-4))", code);
+            CodeAssertAreEqual("new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-4))", code);
         }
 
         [Test]
         public void GenerateCode_DateTimeOffset_TimeWithoutMilliseconds()
         {
             var code = codeGenerator.GenerateCode(new DateTimeOffset(1970, 1, 1, 1, 2, 3, 0, TimeSpan.FromHours(-2)));
-            Assert.AreEqual("new DateTimeOffset(1970, 1, 1, 1, 2, 3, TimeSpan.FromHours(-2))", code);
+            CodeAssertAreEqual("new DateTimeOffset(1970, 1, 1, 1, 2, 3, TimeSpan.FromHours(-2))", code);
         }
 
         [Test]
         public void GenerateCode_DateTimeOffset_TimeWitMilliseconds()
         {
             var code = codeGenerator.GenerateCode(new DateTimeOffset(1970, 1, 1, 1, 2, 3, 4, TimeSpan.FromHours(-2)));
-            Assert.AreEqual("new DateTimeOffset(1970, 1, 1, 1, 2, 3, 4, TimeSpan.FromHours(-2))", code);
+            CodeAssertAreEqual("new DateTimeOffset(1970, 1, 1, 1, 2, 3, 4, TimeSpan.FromHours(-2))", code);
         }
 
         #endregion
@@ -118,7 +118,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
         {
             var obj = new SampleObject1();
             var code = codeGenerator.GenerateCode(obj);
-            Assert.AreEqual("new SampleObject1()", code);
+            CodeAssertAreEqual("new SampleObject1()", code);
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
                 Name = "Test",
             };
             var code = codeGenerator.GenerateCode(obj);
-            Assert.AreEqual(@"new SampleObject1()
+            CodeAssertAreEqual(@"new SampleObject1()
 {
 	Id = 2,
 	Name = ""Test"",
@@ -146,7 +146,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
                 ChildCollection = new List<SampleChildObject1>(),
             };
             var code = codeGenerator.GenerateCode(obj);
-            Assert.AreEqual(@"new SampleObject1()
+            CodeAssertAreEqual(@"new SampleObject1()
 {
 	ChildArray = new SampleChildObject1[0],
 	ChildCollection = new List<SampleChildObject1>(),
@@ -176,7 +176,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
                 },
             };
             var code = codeGenerator.GenerateCode(obj);
-            Assert.AreEqual(@"new SampleObject1()
+            CodeAssertAreEqual(@"new SampleObject1()
 {
 	Id = 2,
 	Name = ""Test"",
@@ -204,7 +204,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
             obj1.Child = obj1;
 
             var code = codeGenerator.GenerateCode(obj1);
-            Assert.AreEqual(@"new SampleObject4()
+            CodeAssertAreEqual(@"new SampleObject4()
 {
 	Child = <root>,
 }", code);
@@ -218,7 +218,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
 
             codeGenerator = new CSharpObjectCodeGenerator(new CSharpObjectCodeGeneratorOptions { RootVariableName = "test" });
             var code = codeGenerator.GenerateCode(obj1);
-            Assert.AreEqual(@"var test = new SampleObject4()
+            CodeAssertAreEqual(@"var test = new SampleObject4()
 {
 	Child = test,
 }", code);
@@ -233,7 +233,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
             obj3.Child = obj1;
 
             var code = codeGenerator.GenerateCode(obj1);
-            Assert.AreEqual(@"new SampleObject4()
+            CodeAssertAreEqual(@"new SampleObject4()
 {
 	Child = new SampleObject4()
 	{
@@ -256,7 +256,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
 
             codeGenerator = new CSharpObjectCodeGenerator(new CSharpObjectCodeGeneratorOptions { RootVariableName = "test" });
             var code = codeGenerator.GenerateCode(obj1);
-            Assert.AreEqual(@"var test = new SampleObject4()
+            CodeAssertAreEqual(@"var test = new SampleObject4()
 {
 	Child = new SampleObject4()
 	{
@@ -279,7 +279,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
 
             codeGenerator = new CSharpObjectCodeGenerator(new CSharpObjectCodeGeneratorOptions { RootVariableName = "test" });
             var code = codeGenerator.GenerateCode(obj1);
-            Assert.AreEqual(@"var test = new SampleObject4()
+            CodeAssertAreEqual(@"var test = new SampleObject4()
 {
 	Child = new SampleObject4()
 	{
@@ -302,7 +302,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
 
             codeGenerator = new CSharpObjectCodeGenerator(new CSharpObjectCodeGeneratorOptions { RootVariableName = "test" });
             var code = codeGenerator.GenerateCode(obj1);
-            Assert.AreEqual(@"var test = new SampleObject4()
+            CodeAssertAreEqual(@"var test = new SampleObject4()
 {
 	Child = new SampleObject4()
 	{
@@ -320,7 +320,7 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
         {
             var obj = new SampleObject5(1, 2);
             var code = codeGenerator.GenerateCode(obj);
-            Assert.AreEqual(@"new SampleObject5(test1: 1, test2: 2)
+            CodeAssertAreEqual(@"new SampleObject5(test1: 1, test2: 2)
 {
 	Test2 = 2,
 }", code);
@@ -331,12 +331,26 @@ namespace LatticeObjectTree.UnitTests.Core.CodeGenerators
         {
             var obj = new SampleObject6(1, 2, "test", 3, 4);
             var code = codeGenerator.GenerateCode(obj);
-            Assert.AreEqual(@"new SampleObject6(test3: default(int), test1: 2, test4: default(string), test2: 3, TEST2: 4)
+            CodeAssertAreEqual(@"new SampleObject6(test3: default(int), test1: 2, test4: default(string), test2: 3, TEST2: 4)
 {
 	Test2 = 3,
 	TEST2 = 4,
 }", code);
         }
+
+        #region Helpers
+
+        public static void CodeAssertAreEqual(string expected, string actual)
+        {
+            Assert.AreEqual(NormalizeNewlines(expected), NormalizeNewlines(actual));
+        }
+
+        private static string NormalizeNewlines(string str)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(str, @"\r\n|\n|\r", "\r\n");
+        }
+
+        #endregion
 
         #region Test Classes
 
