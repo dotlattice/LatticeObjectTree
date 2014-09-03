@@ -218,7 +218,7 @@ namespace LatticeObjectTree
                 var enumerable = (System.Collections.IEnumerable)value;
                 childNodeEnumerable = CreateEnumerableChildNodes(enumerable, node, spawnStrategy);
             }
-            else if (!valueType.Namespace.StartsWith("System."))
+            else if (valueType.Namespace != null && !valueType.Namespace.StartsWith("System."))
             {
                 childNodeEnumerable = CreateObjectChildNodes(value, node, spawnStrategy);
             }

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>LatticeObjectTree</id>
+    <version>$version$</version>
+    <title>LatticeObjectTree</title>
+    <authors>dotlattice</authors>
+    <projectUrl>https://github.com/dotlattice/LatticeObjectTree</projectUrl>
+    <licenseUrl>https://github.com/dotlattice/LatticeObjectTree/blob/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A .NET library for working with a tree of objects.</description>
+  </metadata>
+</package>
