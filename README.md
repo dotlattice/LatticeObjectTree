@@ -1,6 +1,6 @@
 # LatticeObjectTree [![Build status](https://ci.appveyor.com/api/projects/status/uptdctnkaitlyslg)](https://ci.appveyor.com/project/dotlattice/latticeobjecttree)
 
-LatticeObjectTree is a .NET library for working with a tree of objects.  This allows for all kinds of applications, including comparing objects recursively and generating code from an object.  
+LatticeObjectTree is a .NET library for working with a tree of objects.  This allows for all kinds of applications, including comparing objects recursively and generating code from an object.
 
 ## Installation
 
@@ -32,7 +32,7 @@ public class Person
 }
 ```
 
-And let's saw we create a tree for a Person like this:
+And let's say we create a tree for a Person like this:
 
 ```c#
 var apollo = new Person
@@ -159,7 +159,7 @@ Which will give us basically what we passed in as a string:
 }"
 ```
 
-So you might be asking, what is the point of generating the same code that I passed in?  There probably wouldn't be much of a point to that.  But the key is that you can generate C# code from any object.
+So you might be asking, what is the point of generating the same code that I passed in?  You're right, what we did in that example was pretty stupid.  But the key to making this not pointless is that you can generate C# code from any object.
 
 So for example, maybe we are reading these Person objects from a database or parsing them from some type of file.  Here's an example that generates the same output, but uses an XML string as input instead:
 
@@ -174,7 +174,7 @@ My primary use case for generating code like this is to create unit tests.  You 
 The current version of the C# code generator is still fairly experimental.  It works best on entities with a parameterless constructor and properties with public getters and setters.
 
 
-## NUnit Extension
+## NUnit Project
 In addition to the core ObjectTree project, this repository also contains an NUnit project for assertions that compare object tree representations of two objects.
 
 Here are some examples of using it:
@@ -208,3 +208,15 @@ Assert.That(actual, IsObjectTree.EqualTo(expected).WithFilter(new ObjectTreeNode
     }
 }));
 ```
+
+## Todo
+
+Right now, this project is still on a prerelease version.  The main thing left in the project is to decide if the code generation and tree comparison classes should remain in this class or be split off into separate projects.
+
+And the other big thing that needs to be completed is this documentation.  At some point I'm hoping to add information about the following:
+
+* Circular reference handling
+* Node filtering
+* Architecture overview 
+* Extensibility (SpawnStrategy classes)
+
