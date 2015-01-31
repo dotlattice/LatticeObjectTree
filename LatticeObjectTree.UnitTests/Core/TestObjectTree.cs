@@ -10,12 +10,6 @@ namespace LatticeObjectTree.UnitTests.Core
     public class TestObjectTree
     {
         [Test]
-        public void Construct_NullNode()
-        {
-            Assert.Throws<ArgumentNullException>(() => new ObjectTree(default(ObjectTreeNode)));
-        }
-
-        [Test]
         public void Construct_NullValue()
         {
             var tree = new ObjectTree(default(object));
@@ -41,6 +35,55 @@ namespace LatticeObjectTree.UnitTests.Core
             Assert.AreSame(tree1, tree2);
             Assert.AreEqual("test", tree2.RootNode.Value);
             Assert.AreEqual(0, tree2.RootNode.ChildNodes.Count());
+        }
+
+        [Test]
+        public void CreateWithFilter_UnfilteredObjectTree()
+        {
+            var tree = new ObjectTree("test");
+
+            var filter = new ObjectTreeNodeFilter { ExcludedPropertyNames = new[] { "PropertyName" } };
+            var filteredTree = ObjectTree.Create(tree, filter);
+
+            Assert.AreNotSame(tree, filteredTree);
+            Assert.AreEqual("test", filteredTree.RootNode.Value);
+            Assert.AreEqual(0, filteredTree.RootNode.ChildNodes.Count());
+
+            Assert.IsInstanceOf<FilteredObjectTreeSpawnStrategy>(filteredTree.RootNode.SpawnStrategy);
+            Assert.AreSame(filter, ((FilteredObjectTreeSpawnStrategy)filteredTree.RootNode.SpawnStrategy).Filter);
+        }
+
+        [Test]
+        public void CreateWithFilter_ObjectTreeWithSameFilter()
+        {
+            var filter = new ObjectTreeNodeFilter { ExcludedPropertyNames = new[] { "PropertyName" } };
+            var tree = new ObjectTree("test", filter);
+
+            var filteredTree = ObjectTree.Create(tree, filter);
+
+            Assert.AreSame(tree, filteredTree);
+            Assert.AreEqual("test", filteredTree.RootNode.Value);
+            Assert.AreEqual(0, filteredTree.RootNode.ChildNodes.Count());
+
+            Assert.IsInstanceOf<FilteredObjectTreeSpawnStrategy>(filteredTree.RootNode.SpawnStrategy);
+            Assert.AreSame(filter, ((FilteredObjectTreeSpawnStrategy)filteredTree.RootNode.SpawnStrategy).Filter);
+        }
+
+        [Test]
+        public void CreateWithFilter_ObjectTreeWithDifferentFilter()
+        {
+            var originalFilter = new ObjectTreeNodeFilter { ExcludedPropertyNames = new[] { "PropertyName" } };
+            var tree = new ObjectTree("test", originalFilter);
+
+            var newFilter = new ObjectTreeNodeFilter { ExcludedPropertyNames = new[] { "PropertyName" } };
+            var filteredTree = ObjectTree.Create(tree, newFilter);
+
+            Assert.AreNotSame(tree, filteredTree);
+            Assert.AreEqual("test", filteredTree.RootNode.Value);
+            Assert.AreEqual(0, filteredTree.RootNode.ChildNodes.Count());
+
+            Assert.IsInstanceOf<FilteredObjectTreeSpawnStrategy>(filteredTree.RootNode.SpawnStrategy);
+            Assert.AreSame(newFilter, ((FilteredObjectTreeSpawnStrategy)filteredTree.RootNode.SpawnStrategy).Filter);
         }
 
         [Test]
@@ -302,6 +345,26 @@ namespace LatticeObjectTree.UnitTests.Core
             // Break the cycle: should have a special duplicate node, and no child nodes.
             Assert.IsInstanceOf<DuplicateObjectTreeNode>(grandChildElementNode);
             Assert.AreEqual(0, grandChildElementNode.ChildNodes.Count());
+        }
+
+        [Test]
+        public void Construct_AnonymousObject()
+        {
+            var obj = new { a = 1, b = 2 };
+            var objectTree = new ObjectTree(obj);
+
+            var rootNode = objectTree.RootNode;
+            Assert.AreSame(obj, rootNode.Value);
+
+            Assert.AreEqual(2, rootNode.ChildNodes.Count());
+
+            Assert.AreEqual("a", rootNode.ChildNodes.ElementAt(0).EdgeFromParent.Member.Name);
+            Assert.AreEqual(1, rootNode.ChildNodes.ElementAt(0).Value);
+            Assert.AreEqual(0, rootNode.ChildNodes.ElementAt(0).ChildNodes.Count());
+
+            Assert.AreEqual("b", rootNode.ChildNodes.ElementAt(1).EdgeFromParent.Member.Name);
+            Assert.AreEqual(2, rootNode.ChildNodes.ElementAt(1).Value);
+            Assert.AreEqual(0, rootNode.ChildNodes.ElementAt(1).ChildNodes.Count());
         }
 
         #region Test Classes

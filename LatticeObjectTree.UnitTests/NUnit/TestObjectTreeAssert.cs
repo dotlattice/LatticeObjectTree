@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using LatticeObjectTree.NUnit.Comparers;
+using LatticeObjectTree.NUnit;
 
 namespace LatticeObjectTree.UnitTests.NUnit
 {
@@ -24,8 +24,6 @@ namespace LatticeObjectTree.UnitTests.NUnit
             var actual = "world";
             var expectedException = Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(expected, actual));
 
-            Console.WriteLine(expectedException.Message);
-
             var expectedMessage = "  Expected: <LatticeObjectTree.ObjectTree> with root \"hello\"" + Environment.NewLine
                 + "  But was:  <LatticeObjectTree.ObjectTree> with root \"world\"" + Environment.NewLine
                 + "  1 Differences:    < <<root>: expected value \"hello\" but was \"world\".> >";
@@ -38,8 +36,6 @@ namespace LatticeObjectTree.UnitTests.NUnit
             var expected = "hello";
             var actual = "world";
             var expectedException = Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(expected, actual, message: "This is a test message"));
-
-            Console.WriteLine(expectedException.Message);
 
             var expectedMessage = "  This is a test message" + Environment.NewLine
                 + "  Expected: <LatticeObjectTree.ObjectTree> with root \"hello\"" + Environment.NewLine
@@ -54,8 +50,6 @@ namespace LatticeObjectTree.UnitTests.NUnit
             var expected = new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
             var actual = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
             var expectedException = Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(expected, actual));
-
-            Console.WriteLine(expectedException.Message);
 
             var expectedMessage = "  Expected: <LatticeObjectTree.ObjectTree> with root < 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 >" + Environment.NewLine
                 + "  But was:  <LatticeObjectTree.ObjectTree> with root < 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 >" + Environment.NewLine

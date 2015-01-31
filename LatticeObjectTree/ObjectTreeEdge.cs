@@ -47,7 +47,7 @@ namespace LatticeObjectTree
         /// from any given parent object are considered equal (even if they were created independently).
         /// </summary>
         /// <param name="obj">the object to compare to this one</param>
-        /// <returns>true if the two edges that would always resolve the same value from any given parent object</returns>
+        /// <returns>true if this edge is equal to the obj</returns>
         bool Equals(object obj);
     }
 
@@ -65,7 +65,7 @@ namespace LatticeObjectTree
         public DefaultObjectTreeEdge() { }
 
         /// <summary>
-        /// Constructs an edge for the specified member.
+        /// Constructs an edge for the specified member (such as a property or field).
         /// </summary>
         /// <param name="member">the member used to access the node from its parent</param>
         public DefaultObjectTreeEdge(MemberInfo member)
@@ -83,8 +83,10 @@ namespace LatticeObjectTree
             this.index = index;
         }
 
+        /// <inheritdoc />
         public MemberInfo Member { get { return member; } }
 
+        /// <inheritdoc />
         public Type MemberType
         {
             get
@@ -96,7 +98,7 @@ namespace LatticeObjectTree
         #region Property
 
         /// <summary>
-        /// The property that this edge represents, or null if this edge is not a property.
+        /// The property that this edge represents, or null if this edge does not represent a property.
         /// </summary>
         public PropertyInfo Property { get { return member as PropertyInfo; } }
 
@@ -117,7 +119,7 @@ namespace LatticeObjectTree
         #region Field
 
         /// <summary>
-        /// The field that this edge represents, or null if this edge is not a field.
+        /// The field that this edge represents, or null if this edge does not represent a field.
         /// </summary>
         public FieldInfo Field { get { return member as FieldInfo; } }
 
@@ -135,8 +137,10 @@ namespace LatticeObjectTree
 
         #endregion
 
+        /// <inheritdoc />
         public int? Index { get { return index; } }
 
+        /// <inheritdoc />
         public virtual bool TryResolve(object parentObject, out object result)
         {
             result = null;
@@ -190,7 +194,8 @@ namespace LatticeObjectTree
         }
 
         /// <summary>
-        /// Returns the member name preceded by a ".", the index in square brackets, or an empty string for an edge with neither of those.
+        /// Returns the member name preceded by a ".", the index in square brackets, 
+        /// or an empty string for an edge that has neither a member nor an index.
         /// </summary>
         /// <returns>the string representation of this node</returns>
         public override string ToString()
@@ -211,11 +216,18 @@ namespace LatticeObjectTree
 
         #region Equality
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return Equals(obj as DefaultObjectTreeEdge);
         }
 
+        /// <summary>
+        /// Compares two edges for equality such that two edges that always resolve to the same value 
+        /// from any given parent object are considered equal (even if they were created independently).
+        /// </summary>
+        /// <param name="other">the edge to compare to this one</param>
+        /// <returns>true if this edge is equal to the other edge</returns>
         public bool Equals(DefaultObjectTreeEdge other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -226,6 +238,7 @@ namespace LatticeObjectTree
                 && Equals(Index, other.Index);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             int hashCode = 7;
@@ -237,11 +250,13 @@ namespace LatticeObjectTree
             return hashCode;
         }
 
+        /// <inheritdoc />
         public static bool operator ==(DefaultObjectTreeEdge left, DefaultObjectTreeEdge right)
         {
             return Equals(left, right);
         }
 
+        /// <inheritdoc />
         public static bool operator !=(DefaultObjectTreeEdge left, DefaultObjectTreeEdge right)
         {
             return !Equals(left, right);

@@ -32,7 +32,7 @@ namespace LatticeObjectTree
         /// </summary>
         /// <param name="rootNode">the root node of the tree</param>
         /// <exception cref="ArgumentNullException">if the rootNode is null</exception>
-        public ObjectTree(ObjectTreeNode rootNode)
+        private ObjectTree(ObjectTreeNode rootNode)
         {
             if (rootNode == null) throw new ArgumentNullException("rootNode");
             this.rootNode = rootNode;
@@ -60,6 +60,38 @@ namespace LatticeObjectTree
             return objectTree;
         }
 
+        /// <summary>
+        /// Creates an object tree for the specified root object and filter, or just returns 
+        /// the object if it is an ObjectTree that already uses this filter.
+        /// </summary>
+        /// <param name="rootObject">the object that represents the root of the tree, or the tree</param>
+        /// <param name="nodeFilter">a filter on which descendant nodes will be included in the tree</param>
+        /// <returns>the object tree representation of the specified root object with the specified filter applied to its descendant nodes</returns>
+        public static ObjectTree Create(object rootObject, IObjectTreeNodeFilter nodeFilter)
+        {
+            if (nodeFilter == null)
+            {
+                return Create(rootObject);
+            }
+
+            var objectTree = rootObject as ObjectTree;
+            if (objectTree != null)
+            {
+                var rootNode = CreateRootNode(objectTree.RootNode, nodeFilter);
+                if (rootNode != objectTree.RootNode)
+                {
+                    objectTree = new ObjectTree(rootNode);
+                }
+            }
+
+            if (objectTree == null)
+            {
+                objectTree = new ObjectTree(rootObject, nodeFilter);
+            }
+
+            return objectTree;
+        }
+
         private static ObjectTreeNode CreateRootNode(object rootObject)
         {
             var node = rootObject as ObjectTreeNode;
@@ -77,21 +109,22 @@ namespace LatticeObjectTree
                 return CreateRootNode(rootObject);
             }
 
-            var node = rootObject as ObjectTreeNode;
-            if (node == null)
+            var rootNode = rootObject as ObjectTreeNode;
+            if (rootNode != null)
             {
-                node = new ObjectTreeNode(rootObject, new FilteredObjectTreeSpawnStrategy(nodeFilter));
-            }
-            else
-            {
-                var filteredSpawnStrategy = node.SpawnStrategy as FilteredObjectTreeSpawnStrategy;
+                var filteredSpawnStrategy = rootNode.SpawnStrategy as FilteredObjectTreeSpawnStrategy;
                 if (filteredSpawnStrategy == null || filteredSpawnStrategy.Filter != nodeFilter)
                 {
-                    filteredSpawnStrategy = new FilteredObjectTreeSpawnStrategy(nodeFilter, node.SpawnStrategy);
+                    filteredSpawnStrategy = new FilteredObjectTreeSpawnStrategy(nodeFilter, rootNode.SpawnStrategy);
+                    rootNode = new ObjectTreeNode(rootNode.Value, filteredSpawnStrategy);
                 }
-                node = new ObjectTreeNode(node.Value, filteredSpawnStrategy);
             }
-            return node;
+
+            if (rootNode == null)
+            {
+                rootNode = new ObjectTreeNode(rootObject, new FilteredObjectTreeSpawnStrategy(nodeFilter));
+            }
+            return rootNode;
         }
 
         #endregion

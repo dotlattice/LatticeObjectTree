@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\LatticeObjectTree.NUnit.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,19 +32,24 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\LatticeObjectTree.NUnit.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constraints\ConstraintExpressionExtension.cs" />
     <Compile Include="Constraints\ObjectTreeEqualConstraint.cs" />
+    <Compile Include="IsObjectTree.cs" />
     <Compile Include="ObjectTreeAssert.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="LatticeObjectTree.NUnit.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

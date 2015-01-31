@@ -89,7 +89,7 @@ namespace LatticeObjectTree
         }
 
         /// <summary>
-        /// The children of this node (if any).  This will never be null.
+        /// The children of this node (if any).  This will never be null, but it may be empty.
         /// </summary>
         public IEnumerable<ObjectTreeNode> ChildNodes { get { return spawnStrategy.CreateChildNodes(this); } }
 
@@ -119,7 +119,6 @@ namespace LatticeObjectTree
         /// Constructs a node that is already represented by the specified <c>originalNode</c>.
         /// </summary>
         /// <param name="originalNode">the original node that represents this value</param>
-        /// <param name="value">the value of this node</param>
         /// <param name="parentNode">the parent of this version of the node</param>
         /// <param name="edgeFromParent">the edge from the parent node to this node</param>
         /// <exception cref="ArgumentNullException">if <c>originalNode</c>, <c>parentNode</c>, or <c>edgeFromParent</c> is null</exception>

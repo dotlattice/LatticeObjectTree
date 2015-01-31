@@ -11,7 +11,8 @@ namespace LatticeObjectTree.CodeGenerators
     /// Generates C# code from an object.
     /// </summary>
     /// <remarks>
-    /// This won't always generate valid or complete code.  It's intended to at least get close, though.
+    /// This is an experimental class, and it won't always generate valid or complete code.
+    /// It should work well for simple objects that mostly consist of properties with setters.
     /// </remarks>
     public class CSharpObjectCodeGenerator
     {

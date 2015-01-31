@@ -26,7 +26,7 @@ namespace LatticeObjectTree
         }
 
         /// <summary>
-        /// The edges in the path.
+        /// The edges in this path.
         /// </summary>
         public ICollection<IObjectTreeEdge> Edges { get { return edges; } }
 
@@ -99,6 +99,7 @@ namespace LatticeObjectTree
             return this.edges.SequenceEqual(other.edges);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             int hashCode;
@@ -109,11 +110,13 @@ namespace LatticeObjectTree
             return hashCode;
         }
 
+        /// <inheritdoc />
         public static bool operator ==(ObjectTreeEdgePath left, ObjectTreeEdgePath right)
         {
             return Equals(left, right);
         }
 
+        /// <inheritdoc />
         public static bool operator !=(ObjectTreeEdgePath left, ObjectTreeEdgePath right)
         {
             return !Equals(left, right);

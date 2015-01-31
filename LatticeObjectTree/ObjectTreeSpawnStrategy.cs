@@ -32,6 +32,7 @@ namespace LatticeObjectTree
         /// </summary>
         /// <param name="filter">the filter to apply</param>
         /// <param name="backingSpawnStrategy">the spawn strategy on which to apply the filter, or null to use a default <c>DuplicateCheckingObjectTreeSpawnStrategy</c> spawn strategy</param>
+        /// <exception cref="ArgumentNullException">if the filter is null</exception>
         public FilteredObjectTreeSpawnStrategy(IObjectTreeNodeFilter filter, IObjectTreeSpawnStrategy backingSpawnStrategy = null)
         {
             if (filter == null) throw new ArgumentNullException("filter");
@@ -50,10 +51,11 @@ namespace LatticeObjectTree
         /// </summary>
         public IObjectTreeSpawnStrategy BackingSpawnStrategy { get { return backingSpawnStrategy; } }
 
+        /// <inheritdoc />
         public IEnumerable<ObjectTreeNode> CreateChildNodes(ObjectTreeNode node, IObjectTreeSpawnStrategy spawnStrategyOverride)
         {
-            var spawnStrategy = spawnStrategyOverride ?? this;
-            var childNodes = backingSpawnStrategy.CreateChildNodes(node, spawnStrategy);
+            var childSpawnStrategyOverride = spawnStrategyOverride ?? this;
+            var childNodes = backingSpawnStrategy.CreateChildNodes(node, spawnStrategyOverride: childSpawnStrategyOverride);
             var filteredChildNodes = filter.Apply(childNodes);
             return filteredChildNodes;
         }
@@ -85,14 +87,15 @@ namespace LatticeObjectTree
         /// </summary>
         public IObjectTreeSpawnStrategy BackingSpawnStrategy { get { return backingSpawnStrategy; } }
 
+        /// <inheritdoc />
         public IEnumerable<ObjectTreeNode> CreateChildNodes(ObjectTreeNode node, IObjectTreeSpawnStrategy spawnStrategyOverride)
         {
-            var spawnStrategy = spawnStrategyOverride ?? this;
+            var childSpawnStrategyOverride = spawnStrategyOverride ?? this;
 
             // Need to do this first to be able to get the root node.
             StoreNodeIfNecessary(node);
 
-            var childNodes = backingSpawnStrategy.CreateChildNodes(node, spawnStrategy);
+            var childNodes = backingSpawnStrategy.CreateChildNodes(node, spawnStrategyOverride: childSpawnStrategyOverride);
             foreach (var childNode in childNodes)
             {
                 ObjectTreeNode originalChildNode;
@@ -102,8 +105,8 @@ namespace LatticeObjectTree
                 }
                 else
                 {
-                    // The parent reference it not set yet on the childNode, so we can't use its ToPath method.
-                    //var childMemberPath = childNode.ToPath();
+                    // The parent reference it not set yet on the childNode, so we can't use its ToEdgePath method.
+                    //var childMemberPath = childNode.ToEdgePath();
                     var childPath = new ObjectTreeEdgePath(node.ToEdgePath().Edges.Concat(new[] { childNode.EdgeFromParent }));
                     var originalChildMemberPath = originalChildNode.ToEdgePath();
                     if (Equals(originalChildMemberPath, childPath))
@@ -188,10 +191,11 @@ namespace LatticeObjectTree
     /// </summary>
     public class BasicObjectTreeSpawnStrategy : IObjectTreeSpawnStrategy
     {
+        /// <inheritdoc />
         public IEnumerable<ObjectTreeNode> CreateChildNodes(ObjectTreeNode node, IObjectTreeSpawnStrategy spawnStrategyOverride)
         {
             if (node == null) throw new ArgumentNullException("node");
-            var spawnStrategy = spawnStrategyOverride ?? this;
+            var childSpawnStrategyOverride = spawnStrategyOverride ?? this;
 
             if (node.OriginalNode != null)
             {
@@ -199,8 +203,11 @@ namespace LatticeObjectTree
             }
 
             var value = node.Value;
-            var memberType = node.EdgeFromParent != null ? node.EdgeFromParent.MemberType : null;
-            var valueType = value != null ? value.GetType() : memberType;
+            var valueType = value != null ? value.GetType() : null;
+            if (valueType == null)
+            {
+                valueType= node.EdgeFromParent != null ? node.EdgeFromParent.MemberType : null;
+            }
             if (valueType == null)
             {
                 return Enumerable.Empty<ObjectTreeNode>();
@@ -216,11 +223,11 @@ namespace LatticeObjectTree
             else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(valueType))
             {
                 var enumerable = (System.Collections.IEnumerable)value;
-                childNodeEnumerable = CreateEnumerableChildNodes(enumerable, node, spawnStrategy);
+                childNodeEnumerable = CreateEnumerableChildNodes(enumerable, node, childSpawnStrategyOverride);
             }
-            else if (valueType.Namespace != null && !valueType.Namespace.StartsWith("System."))
+            else if ((valueType.Namespace != null && !valueType.Namespace.StartsWith("System.")) || valueType.Name.Contains("AnonymousType"))
             {
-                childNodeEnumerable = CreateObjectChildNodes(value, node, spawnStrategy);
+                childNodeEnumerable = CreateObjectChildNodes(value, node, childSpawnStrategyOverride);
             }
             else
             {

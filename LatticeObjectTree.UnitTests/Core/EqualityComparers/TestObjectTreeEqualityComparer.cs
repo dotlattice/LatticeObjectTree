@@ -205,8 +205,6 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
 
             var differences = objectComparer.FindDifferences(obj1, obj2).ToList();
             Assert.AreEqual(1, differences.Count);
-
-
         }
 
         [Test]

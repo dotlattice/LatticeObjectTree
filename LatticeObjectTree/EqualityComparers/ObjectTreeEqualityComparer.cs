@@ -12,12 +12,23 @@ namespace LatticeObjectTree.Comparers
     {
         #region EqualityComparer
 
+        /// <summary>
+        /// Returns true if there are no differences between the two object trees.
+        /// </summary>
+        /// <param name="x">one of the object trees to compare</param>
+        /// <param name="y">one of the object trees to compare</param>
+        /// <returns>true if the object trees are equal</returns>
         public bool Equals(ObjectTree x, ObjectTree y)
         {
             var differences = FindDifferences(x, y);
             return !differences.Any();
         }
 
+        /// <summary>
+        /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
         public int GetHashCode(ObjectTree obj)
         {
             return GetHashCodeRecursive(new[] { obj.RootNode }, level: 0);
@@ -25,6 +36,7 @@ namespace LatticeObjectTree.Comparers
 
         private int GetHashCodeRecursive(IEnumerable<ObjectTreeNode> nodes, int level)
         {
+            // Protection from infinite recursion
             const int maxLevel = 1000;
             if (level > maxLevel)
             {
@@ -53,9 +65,17 @@ namespace LatticeObjectTree.Comparers
             return hashCode;
         }
 
+        /// <summary>
+        /// Returns a hash code for a value from a leaf node of an object tree.
+        /// </summary>
+        protected virtual int GetValueHashCode(object value)
+        {
+            return value != null ? value.GetHashCode() : 0;
+        }
+
         #endregion
 
-        #region FindDifferences
+        #region Differences
 
         /// <summary>
         /// Compares the two objects recursively.
@@ -82,6 +102,12 @@ namespace LatticeObjectTree.Comparers
             return FindDifferences(expected.RootNode, actual.RootNode);
         }
 
+        /// <summary>
+        /// Compares the two object tree nodes recursively.
+        /// </summary>
+        /// <param name="expected">the node of the expected object</param>
+        /// <param name="actual">the node of the actual object</param>
+        /// <returns>any differences detected between the two nodes</returns>
         public IEnumerable<ObjectTreeNodeDifference> FindDifferences(ObjectTreeNode expected, ObjectTreeNode actual)
         {
             return FindDifferencesRecursive(expected, actual, level: 0);
@@ -184,10 +210,6 @@ namespace LatticeObjectTree.Comparers
             }
         }
 
-        #endregion
-
-        #region Helpers
-
         /// <summary>
         /// Compares two values from a leaf node in an object tree.
         /// </summary>
@@ -219,14 +241,6 @@ namespace LatticeObjectTree.Comparers
             {
                 return Object.Equals(expected, actual);
             }
-        }
-
-        /// <summary>
-        /// Returns a hash code for a value from a leaf node of an object tree.
-        /// </summary>
-        protected virtual int GetValueHashCode(object value)
-        {
-            return value != null ? value.GetHashCode() : 0;
         }
 
         /// <summary>

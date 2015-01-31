@@ -24,6 +24,9 @@ namespace LatticeObjectTree
     /// </summary>
     public class ObjectTreeNodeFilter : IObjectTreeNodeFilter
     {
+        /// <summary>
+        /// Constructs a default filter.
+        /// </summary>
         public ObjectTreeNodeFilter()
         {
             ExcludedPropertyNames = new List<string>();
@@ -52,6 +55,7 @@ namespace LatticeObjectTree
         /// </summary>
         public ICollection<Func<ObjectTreeNode, bool>> ExcludedNodePredicates { get; set; }
 
+        /// <inheritdoc />
         public IEnumerable<ObjectTreeNode> Apply(IEnumerable<ObjectTreeNode> nodes)
         {
             var predicates = CreateAllExcludedNodePredicates().ToList();

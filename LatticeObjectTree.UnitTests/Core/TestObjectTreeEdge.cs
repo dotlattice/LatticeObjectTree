@@ -123,10 +123,10 @@ namespace LatticeObjectTree.UnitTests.Core
             public string Hi { get; set; }
             public string HI { get; set; }
 
-            public string hi;
-            public int hello;
-            public int Hello;
-            public DateTime world;
+            public string hi = null;
+            public int hello = 0;
+            public int Hello = 0;
+            public DateTime world = default(DateTime);
         }
 
         private static void AssertEquality(DefaultObjectTreeEdge a, DefaultObjectTreeEdge b, bool expected)
