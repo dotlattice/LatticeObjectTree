@@ -158,7 +158,7 @@ var apolloTree = ObjectTree.Create(apollo);
 
 Here's a visualization of the tree for this person:
 
-<pre>
+```
          +---------------+                             
          |Person (Apollo)|                             
          +-----+---------+                             
@@ -183,7 +183,7 @@ Here's a visualization of the tree for this person:
                       +----+----+                      
                       |"Clubber"|              NULL    
                       +---------+                      
-</pre>
+```
 
 There are two main parts to an object tree:
 
@@ -245,7 +245,7 @@ var apolloTree = ObjectTree.Create(apollo);
 
 With this circular reference, our tree looks like this:
 
-<pre>
+```
          +---------------+                        
          |Person (Apollo)| <---------------------+
          +-----+---------+                       |
@@ -269,8 +269,8 @@ With this circular reference, our tree looks like this:
                            |           BestFriend 
                       +----+----+                 
                       |"Clubber"|                 
-                      +---------+                 
-</pre>
+                      +---------+
+```
 
 Because of that cycle, you would get into an infinite loop if you tried to iterate through this tree without any special handling.
 
