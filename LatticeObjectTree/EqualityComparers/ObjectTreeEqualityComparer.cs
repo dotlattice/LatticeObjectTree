@@ -13,6 +13,29 @@ namespace LatticeObjectTree.Comparers
         #region EqualityComparer
 
         /// <summary>
+        /// Returns true if there are no differences between the trees of the two objects.
+        /// </summary>
+        /// <param name="x">one of the objects to compare</param>
+        /// <param name="y">one of the objects to compare</param>
+        /// <returns>true if the object trees are equal</returns>
+        public new bool Equals(object x, object y)
+        {
+            return !FindDifferences(x, y).Any();
+        }
+
+        /// <summary>
+        /// Returns true if there are no differences between the filtered trees of the two objects.
+        /// </summary>
+        /// <param name="x">one of the objects to compare</param>
+        /// <param name="y">one of the objects to compare</param>
+        /// <param name="nodeFilter">a filter to control how the objects are compared</param>
+        /// <returns>true if the filtered object trees are equal</returns>
+        public bool Equals(object x, object y, IObjectTreeNodeFilter nodeFilter)
+        {
+            return !FindDifferences(x, y, nodeFilter).Any();
+        }
+
+        /// <summary>
         /// Returns true if there are no differences between the two object trees.
         /// </summary>
         /// <param name="x">one of the object trees to compare</param>
@@ -20,8 +43,27 @@ namespace LatticeObjectTree.Comparers
         /// <returns>true if the object trees are equal</returns>
         public bool Equals(ObjectTree x, ObjectTree y)
         {
-            var differences = FindDifferences(x, y);
-            return !differences.Any();
+            return !FindDifferences(x, y).Any();
+        }
+
+        /// <summary>
+        /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public int GetHashCode(object obj)
+        {
+            return GetHashCode(ObjectTree.Create(obj));
+        }
+
+        /// <summary>
+        /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public int GetHashCode(object obj, IObjectTreeNodeFilter filter)
+        {
+            return GetHashCode(ObjectTree.Create(obj, filter));
         }
 
         /// <summary>
@@ -86,6 +128,18 @@ namespace LatticeObjectTree.Comparers
         public IEnumerable<ObjectTreeNodeDifference> FindDifferences(object expected, object actual)
         {
             return FindDifferences(ObjectTree.Create(expected), ObjectTree.Create(actual));
+        }
+
+        /// <summary>
+        /// Compares the two objects recursively.
+        /// </summary>
+        /// <param name="expected">the expected object</param>
+        /// <param name="actual">the actual object</param>
+        /// <param name="nodeFilter">a filter to control how the objects are compared</param>
+        /// <returns>any differences detected between the two objects</returns>
+        public IEnumerable<ObjectTreeNodeDifference> FindDifferences(object expected, object actual, IObjectTreeNodeFilter nodeFilter)
+        {
+            return FindDifferences(ObjectTree.Create(expected, nodeFilter), ObjectTree.Create(actual, nodeFilter));
         }
 
         /// <summary>
@@ -183,7 +237,7 @@ namespace LatticeObjectTree.Comparers
             {
                 foreach (var expectedChild in expectedChildren)
                 {
-                    var actualChild = actualChildren.FirstOrDefault(a => Equals(a.EdgeFromParent, expectedChild.EdgeFromParent));
+                    var actualChild = actualChildren.FirstOrDefault(a => Object.Equals(a.EdgeFromParent, expectedChild.EdgeFromParent));
                     if (actualChild == null)
                     {
                         var message = string.Format("{0}: expected a child at \"{1}\" but did not find one.", expectedPath.ToString(), expectedChild.EdgeFromParent.ToString());
