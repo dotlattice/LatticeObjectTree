@@ -284,7 +284,8 @@ So because its "ChildNodes" property of the duplicate node will be empty, you wo
 
 ## Extensibility
 
-The goal in designing this library was to make it very simple to use out of the box while still making it very customizable.  So there are several extension points for replacing the default logic.
+There are many different ways that a tree could be created and used for an object, and the default implementation may not work for all situations.  So there are several ways to extend or replace the default logic.
+
 
 ### Spawn Strategies
 
@@ -297,13 +298,13 @@ public interface IObjectTreeSpawnStrategy
 }
 ```
 
-This is the primary extension point in the library.  The default works great if your objects mostly consist of public properties or fields, but in other cases you may need to implement your own strategy for determining what the child nodes of an object are.
+This is the primary extension point in the library.  The default implementation works great if your objects mostly consist of public properties or fields, but in other cases you may need your own strategy for determining what the child nodes of an object are.
 
 There are four spawn strategies included in the library by default:
 
 * BasicObjectTreeSpawnStrategy
-  * The most basic, core spawn strategy
-  * Looks at the type of the node's value and creates child nodes based on the public properties and fields in that type.
+    * The most basic, core spawn strategy
+    * Looks at the type of the node's value and creates child nodes based on the public properties and fields in that type.
   * Does not include any cycle detection or filtering support.
 * DuplicateCheckingObjectTreeSpawnStrategy
 	* The default strategy used by an ObjectTreeNode

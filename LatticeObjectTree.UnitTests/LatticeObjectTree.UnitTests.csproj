@@ -48,8 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\CodeGenerators\TestCSharpObjectCodeGenerator.cs" />
-    <Compile Include="Core\EqualityComparers\TestObjectTreeEqualityComparer.cs" />
+    <Compile Include="Core\Comparers\TestObjectTreeEqualityComparer.cs" />
     <Compile Include="Core\TestObjectTreeNode.cs" />
     <Compile Include="NUnit\Constraints\TestObjectTreeEqualConstraint.cs" />
     <Compile Include="NUnit\TestObjectTreeAssertSampleObjects.cs" />
