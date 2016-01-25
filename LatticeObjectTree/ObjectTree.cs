@@ -97,7 +97,8 @@ namespace LatticeObjectTree
             var node = rootObject as ObjectTreeNode;
             if (node == null)
             {
-                node = new ObjectTreeNode(rootObject, new DuplicateCheckingObjectTreeSpawnStrategy());
+                var defaultSpawnStrategy = new DuplicateCheckingObjectTreeSpawnStrategy();
+                node = defaultSpawnStrategy.CreateRootNode(rootObject);
             }
             return node;
         }
@@ -116,13 +117,14 @@ namespace LatticeObjectTree
                 if (filteredSpawnStrategy == null || filteredSpawnStrategy.Filter != nodeFilter)
                 {
                     filteredSpawnStrategy = new FilteredObjectTreeSpawnStrategy(nodeFilter, rootNode.SpawnStrategy);
-                    rootNode = new ObjectTreeNode(rootNode.Value, filteredSpawnStrategy);
+                    rootNode = filteredSpawnStrategy.CreateRootNode(rootNode.Value);
                 }
             }
 
             if (rootNode == null)
             {
-                rootNode = new ObjectTreeNode(rootObject, new FilteredObjectTreeSpawnStrategy(nodeFilter));
+                var filteredSpawnStrategy = new FilteredObjectTreeSpawnStrategy(nodeFilter);
+                rootNode = filteredSpawnStrategy.CreateRootNode(rootObject);
             }
             return rootNode;
         }

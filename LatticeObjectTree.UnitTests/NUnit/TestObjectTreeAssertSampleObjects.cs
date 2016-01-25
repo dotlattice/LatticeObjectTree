@@ -148,6 +148,83 @@ namespace LatticeObjectTree.UnitTests.NUnit
             AssertAreNotEqual(a, b);
         }
 
+        [Test]
+        public void ListTestObjects_EmptyObjectsWithSameType()
+        {
+            var obj1 = new ListTestObject<string>();
+            var obj2 = new ListTestObject<string>();
+
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void ListTestObjects_Samples_Equal()
+        {
+            var obj1 = new ListTestObject<string>()
+            {
+                Enumerable = new[] { "test"},
+                ReadOnlyCollection = new[] { "test2", "test22" },
+                Collection = new[] { "test3" },
+                Array = new[] { "test4" },
+                IList = new[] { "test5" },
+                List = new List<string> { "test6" },
+            };
+            var obj2 = new ListTestObject<string>()
+            {
+                Enumerable = new[] { "test" },
+                ReadOnlyCollection = new[] { "test2", "test22" },
+                Collection = new[] { "test3" },
+                Array = new[] { "test4" },
+                IList = new[] { "test5" },
+                List = new List<string> { "test6" },
+            };
+
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void ListTestObjects_Samples_NotEqual()
+        {
+            var obj1 = new ListTestObject<string>()
+            {
+                Enumerable = new[] { "test" },
+                ReadOnlyCollection = new[] { "test2", "test22" },
+                Collection = new[] { "test3" },
+                Array = new[] { "test4" },
+                IList = new[] { "test5" },
+                List = new List<string> { "test6" },
+            };
+            var obj2 = new ListTestObject<string>()
+            {
+                Enumerable = new[] { "TEST" },
+                ReadOnlyCollection = new[] { "TEST2", "TEST22" },
+                Collection = new[] { "TEST3" },
+                Array = new[] { "TEST4" },
+                IList = new[] { "TEST5" },
+                List = new List<string> { "TEST6" },
+            };
+
+            AssertAreNotEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void ListTestObjects_EmptyObjectsWithDifferentTypes()
+        {
+            var obj1 = new ListTestObject<string>();
+            var obj2 = new ListTestObject<int>();
+
+            AssertAreNotEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void ListTestObjects_EmptyObjectsWithDifferentCompatibleTypes()
+        {
+            var obj1 = new ListTestObject<Person>();
+            var obj2 = new ListTestObject<Employee>();
+
+            AssertAreNotEqual(obj1, obj2);
+        }
+
         #region Helpers
 
         private void AssertAreEqual(object expected, object actual)
@@ -332,6 +409,16 @@ namespace LatticeObjectTree.UnitTests.NUnit
         private enum PhoneType
         {
             Home, Cell, Work
+        }
+
+        private class ListTestObject<T>
+        {
+            public IEnumerable<T> Enumerable { get; set; } = new T[0];
+            public IReadOnlyCollection<T> ReadOnlyCollection { get; set; } = new T[0];
+            public ICollection<T> Collection { get; set; } = new T[0];
+            public T[] Array { get; set; } = new T[0];
+            public IList<T> IList { get; set; } = new T[0];
+            public List<T> List { get; set; } = new List<T>();
         }
 
         #endregion

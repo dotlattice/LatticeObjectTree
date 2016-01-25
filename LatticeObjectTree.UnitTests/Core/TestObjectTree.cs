@@ -15,16 +15,18 @@ namespace LatticeObjectTree.UnitTests.Core
             var tree = new ObjectTree(default(object));
             Assert.IsNull(tree.RootNode.Value);
             Assert.AreEqual(0, tree.RootNode.ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, tree.RootNode.NodeType);
         }
 
         [Test]
         public void Construct_NodeValueToObjectConstructor()
         {
-            var node = new ObjectTreeNode("test");
+            var node = new ObjectTreeNode("test", ObjectTreeNodeType.Primitive);
             var tree = new ObjectTree(node);
             Assert.AreSame(node, tree.RootNode);
             Assert.AreEqual("test", tree.RootNode.Value);
             Assert.AreEqual(0, tree.RootNode.ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Primitive, tree.RootNode.NodeType);
         }
 
         [Test]
@@ -35,6 +37,7 @@ namespace LatticeObjectTree.UnitTests.Core
             Assert.AreSame(tree1, tree2);
             Assert.AreEqual("test", tree2.RootNode.Value);
             Assert.AreEqual(0, tree2.RootNode.ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Primitive, tree2.RootNode.NodeType);
         }
 
         [Test]
@@ -348,6 +351,47 @@ namespace LatticeObjectTree.UnitTests.Core
         }
 
         [Test]
+        public void Construct_SampleObject7_PropertiesWithSystemTypes()
+        {
+            var obj = new SampleObject7
+            {
+                Type = typeof(string),
+                TypeToStringFunc = (Type t) => t.FullName,
+                Field = typeof(string).GetField("Empty", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public),
+                Property = typeof(string).GetProperty("Length"),
+            };
+
+            var objectTree = new ObjectTree(obj);
+
+            var rootNode = objectTree.RootNode;
+            Assert.AreSame(obj, rootNode.Value);
+            Assert.AreEqual(ObjectTreeNodeType.Object, rootNode.NodeType);
+
+            var childNodes = objectTree.RootNode.ChildNodes.ToList();
+            Assert.AreEqual(4, childNodes.Count);
+
+            Assert.AreEqual("Type", GetEdgeFromNode(childNodes.ElementAt(0)).Property.Name);
+            Assert.AreSame(obj.Type, childNodes.ElementAt(0).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(0).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(0).NodeType);
+
+            Assert.AreEqual("TypeToStringFunc", GetEdgeFromNode(childNodes.ElementAt(1)).Property.Name);
+            Assert.AreSame(obj.TypeToStringFunc, childNodes.ElementAt(1).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(1).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(1).NodeType);
+
+            Assert.AreEqual("Field", GetEdgeFromNode(childNodes.ElementAt(2)).Property.Name);
+            Assert.AreSame(obj.Field, childNodes.ElementAt(2).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(2).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(2).NodeType);
+
+            Assert.AreEqual("Property", GetEdgeFromNode(childNodes.ElementAt(3)).Property.Name);
+            Assert.AreSame(obj.Property, childNodes.ElementAt(3).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(3).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(3).NodeType);
+        }
+
+        [Test]
         public void Construct_AnonymousObject()
         {
             var obj = new { a = 1, b = 2 };
@@ -356,14 +400,17 @@ namespace LatticeObjectTree.UnitTests.Core
             var rootNode = objectTree.RootNode;
             Assert.AreSame(obj, rootNode.Value);
 
+            Assert.AreEqual(ObjectTreeNodeType.Object, rootNode.NodeType);
             Assert.AreEqual(2, rootNode.ChildNodes.Count());
 
             Assert.AreEqual("a", rootNode.ChildNodes.ElementAt(0).EdgeFromParent.Member.Name);
             Assert.AreEqual(1, rootNode.ChildNodes.ElementAt(0).Value);
+            Assert.AreEqual(ObjectTreeNodeType.Primitive, rootNode.ChildNodes.ElementAt(0).NodeType);
             Assert.AreEqual(0, rootNode.ChildNodes.ElementAt(0).ChildNodes.Count());
 
             Assert.AreEqual("b", rootNode.ChildNodes.ElementAt(1).EdgeFromParent.Member.Name);
             Assert.AreEqual(2, rootNode.ChildNodes.ElementAt(1).Value);
+            Assert.AreEqual(ObjectTreeNodeType.Primitive, rootNode.ChildNodes.ElementAt(1).NodeType);
             Assert.AreEqual(0, rootNode.ChildNodes.ElementAt(1).ChildNodes.Count());
         }
 
@@ -410,6 +457,14 @@ namespace LatticeObjectTree.UnitTests.Core
         private class SampleObject6
         {
             public ICollection<SampleObject5> Nephews { get; set; }
+        }
+
+        private class SampleObject7
+        {
+            public Type Type { get; set; }
+            public Func<Type, string> TypeToStringFunc { get; set; }
+            public System.Reflection.FieldInfo Field { get; set; }
+            public System.Reflection.PropertyInfo Property { get; set; }
         }
 
         #endregion

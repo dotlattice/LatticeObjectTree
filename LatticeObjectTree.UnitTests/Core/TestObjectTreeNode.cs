@@ -12,14 +12,14 @@ namespace LatticeObjectTree.UnitTests.Core
         [Test]
         public void ToEdgePath_RootNode()
         {
-            var node = new ObjectTreeNode(null);
+            var node = new ObjectTreeNode(null, ObjectTreeNodeType.Object);
             Assert.AreEqual(0, node.ToEdgePath().Edges.Count);
         }
 
         [Test]
         public void ToEdgePath_OneParentWithIndexEdge()
         {
-            var node = new ObjectTreeNode(null, new ObjectTreeNode(null), new DefaultObjectTreeEdge(0));
+            var node = new ObjectTreeNode(null, ObjectTreeNodeType.Object, new ObjectTreeNode(null, ObjectTreeNodeType.Object), new DefaultObjectTreeEdge(0));
             Assert.AreEqual(1, node.ToEdgePath().Edges.Count);
             Assert.AreEqual(0, node.ToEdgePath().Edges.Single().Index);
         }
@@ -27,9 +27,11 @@ namespace LatticeObjectTree.UnitTests.Core
         [Test]
         public void ToEdgePath_TwoParentWithIndexEdges()
         {
-            var node = new ObjectTreeNode(null, 
-                new ObjectTreeNode(null, 
-                    new ObjectTreeNode(null), 
+            var node = new ObjectTreeNode(null,
+                ObjectTreeNodeType.Object,
+                new ObjectTreeNode(null,
+                    ObjectTreeNodeType.Object,
+                    new ObjectTreeNode(null, ObjectTreeNodeType.Object), 
                     new DefaultObjectTreeEdge(0)
                 ), 
                 new DefaultObjectTreeEdge(1)

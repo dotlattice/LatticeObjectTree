@@ -152,6 +152,27 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
         }
 
         [Test]
+        public void FindDifferences_SampleObject1_EmptyArrays()
+        {
+            var a = new SampleObject1
+            {
+                Id = 1,
+                Name = "Test",
+                ChildArray = new SampleChildObject1[0],
+                ChildCollection = new SampleChildObject1[0],
+            };
+            var b = new SampleObject1
+            {
+                Id = 1,
+                Name = "Test",
+                ChildArray = new SampleChildObject1[0],
+                ChildCollection = new SampleChildObject1[0],
+            };
+            var differences = objectComparer.FindDifferences(a, b).ToList();
+            Assert.AreEqual(0, differences.Count);
+        }
+
+        [Test]
         public void FindDifferences_SampleObject1_DifferentCollectionLengths()
         {
             var a = new SampleObject1

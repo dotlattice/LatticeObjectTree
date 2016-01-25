@@ -49,8 +49,8 @@ namespace LatticeObjectTree.Comparers
         /// <summary>
         /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">the object or object tree</param>
+        /// <returns>the hashcode of the object</returns>
         public int GetHashCode(object obj)
         {
             return GetHashCode(ObjectTree.Create(obj));
@@ -59,8 +59,9 @@ namespace LatticeObjectTree.Comparers
         /// <summary>
         /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">the object or object tree</param>
+        /// <param name="filter">the filter to apply to the object tree</param>
+        /// <returns>the hashcode of the object</returns>
         public int GetHashCode(object obj, IObjectTreeNodeFilter filter)
         {
             return GetHashCode(ObjectTree.Create(obj, filter));
@@ -69,11 +70,11 @@ namespace LatticeObjectTree.Comparers
         /// <summary>
         /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
-        public int GetHashCode(ObjectTree obj)
+        /// <param name="objTree">the object tree</param>
+        /// <returns>the hashcode of the object tree</returns>
+        public int GetHashCode(ObjectTree objTree)
         {
-            return GetHashCodeRecursive(new[] { obj.RootNode }, level: 0);
+            return GetHashCodeRecursive(new[] { objTree.RootNode }, level: 0);
         }
 
         private int GetHashCodeRecursive(IEnumerable<ObjectTreeNode> nodes, int level)
@@ -225,6 +226,17 @@ namespace LatticeObjectTree.Comparers
                 yield break;
             }
 
+            if (expectedNode.NodeType != actualNode.NodeType)
+            {
+                var message = string.Format("{0}: expected {1} node type but was {2}.",
+                    expectedPath.ToString(),
+                    Enum.GetName(typeof(ObjectTreeNodeType), expectedNode.NodeType),
+                    Enum.GetName(typeof(ObjectTreeNodeType), actualNode.NodeType)
+                );
+                yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
+                yield break;
+            }
+
             var expectedChildren = expectedNode.ChildNodes.ToList();
             var actualChildren = actualNode.ChildNodes.ToList();
             if (expectedChildren.Count != actualChildren.Count)
@@ -252,13 +264,17 @@ namespace LatticeObjectTree.Comparers
                     }
                 }
             }
-            else if (!actualChildren.Any())
+            else if (!actualChildren.Any() && expectedNode.NodeType != ObjectTreeNodeType.Collection)
             {
                 var expectedValue = expectedNode.Value;
                 var actualValue = actualNode.Value;
                 if (!AreValuesEqual(expectedValue, actualValue))
                 {
-                    var message = string.Format("{0}: expected value {1} but was {2}.", expectedPath.ToString(), FormatValue(expectedValue), FormatValue(actualValue));
+                    var message = string.Format("{0}: expected value {1} but was {2}.",
+                        expectedPath.ToString(),
+                        FormatValue(expectedValue),
+                        FormatValue(actualValue)
+                    );
                     yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                 }
             }

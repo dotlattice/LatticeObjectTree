@@ -40,6 +40,7 @@
     <Compile Include="ObjectTreeEdgePath.cs" />
     <Compile Include="ObjectTree.cs" />
     <Compile Include="ObjectTreeNodeFilter.cs" />
+    <Compile Include="ObjectTreeNodeType.cs" />
     <Compile Include="ObjectTreeSpawnStrategy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

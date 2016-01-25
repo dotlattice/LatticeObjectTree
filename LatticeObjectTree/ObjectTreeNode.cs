@@ -12,6 +12,7 @@ namespace LatticeObjectTree
     public class ObjectTreeNode
     {
         private readonly object value;
+        private readonly ObjectTreeNodeType nodeType;
         private readonly ObjectTreeNode parentNode;
         private readonly IObjectTreeEdge edgeFromParent;
         private readonly IObjectTreeSpawnStrategy spawnStrategy;
@@ -20,26 +21,29 @@ namespace LatticeObjectTree
         /// Constructs a root node with the specified value.
         /// </summary>
         /// <param name="value">the object that this node represents</param>
+        /// <param name="nodeType">the type of this node</param>
         /// <param name="spawnStrategy">the strategy to use for generating descendant nodes, 
         /// or null to use a default <c>DuplicateCheckingObjectTreeSpawnStrategy</c> strategy</param>
-        public ObjectTreeNode(object value, IObjectTreeSpawnStrategy spawnStrategy = null)
-            : this(value, parentNode: null, edgeFromParent: null, spawnStrategy: spawnStrategy) { }
+        public ObjectTreeNode(object value, ObjectTreeNodeType nodeType, IObjectTreeSpawnStrategy spawnStrategy = null)
+            : this(value, nodeType: nodeType, parentNode: null, edgeFromParent: null, spawnStrategy: spawnStrategy) { }
 
         /// <summary>
         /// Constructs a node with the specified value.
         /// </summary>
         /// <param name="value">the object that this node represents</param>
+        /// <param name="nodeType">the type of this node</param>
         /// <param name="parentNode">the parent of this node, or null for a root node</param>
         /// <param name="edgeFromParent">the edge that leads from the parent to this node, or null for a root node</param>
         /// <param name="spawnStrategy">the strategy to use for generating descendant nodes, 
         /// or null to use a default <c>DuplicateCheckingObjectTreeSpawnStrategy</c> strategy</param>
         /// <exception cref="ArgumentException">if one of <c>parentNode</c> and <c>edgeFromParent</c> is null and the other is not null</exception>
-        public ObjectTreeNode(object value, ObjectTreeNode parentNode, IObjectTreeEdge edgeFromParent, IObjectTreeSpawnStrategy spawnStrategy = null)
+        public ObjectTreeNode(object value, ObjectTreeNodeType nodeType, ObjectTreeNode parentNode, IObjectTreeEdge edgeFromParent, IObjectTreeSpawnStrategy spawnStrategy = null)
         {
             if ((parentNode == null) != (edgeFromParent == null))
                 throw new ArgumentException("Either the parent and edge must both be null or neither can be null (you can't have one without the other)");
 
             this.value = value;
+            this.nodeType = nodeType;
             this.parentNode = parentNode;
             this.edgeFromParent = edgeFromParent;
             this.spawnStrategy = spawnStrategy ?? new DuplicateCheckingObjectTreeSpawnStrategy();
@@ -49,6 +53,11 @@ namespace LatticeObjectTree
         /// The object represented by this node.  This can be null.
         /// </summary>
         public object Value { get { return value; } }
+
+        /// <summary>
+        /// The type of this node.
+        /// </summary>
+        public ObjectTreeNodeType NodeType { get { return nodeType; } }
 
         /// <summary>
         /// The parent of this node, or null if this is a root node.
@@ -123,7 +132,7 @@ namespace LatticeObjectTree
         /// <param name="edgeFromParent">the edge from the parent node to this node</param>
         /// <exception cref="ArgumentNullException">if <c>originalNode</c>, <c>parentNode</c>, or <c>edgeFromParent</c> is null</exception>
         public DuplicateObjectTreeNode(ObjectTreeNode originalNode, ObjectTreeNode parentNode, IObjectTreeEdge edgeFromParent)
-             : base(originalNode != null ? originalNode.Value : null, parentNode, edgeFromParent, new EmptyObjectTreeSpawnStrategy())
+             : base(originalNode != null ? originalNode.Value : null, originalNode != null ? originalNode.NodeType : ObjectTreeNodeType.Unknown, parentNode, edgeFromParent, new EmptyObjectTreeSpawnStrategy())
         {
             if (originalNode == null) throw new ArgumentNullException("originalNode");
             if (parentNode == null) throw new ArgumentNullException("parentNode");
