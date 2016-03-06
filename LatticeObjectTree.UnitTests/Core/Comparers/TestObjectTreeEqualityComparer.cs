@@ -50,6 +50,7 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
             {
                 Id = 1,
                 Name = "Test",
+                BinaryData = new byte[] { 1, 2, 3 },
                 ChildArray = new[] 
                 { 
                     new SampleChildObject1 { Hi = 1, },
@@ -73,6 +74,7 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
             {
                 Id = 1,
                 Name = "Test",
+                BinaryData = new byte[] { 1, 2, 3 },
                 ChildArray = new[] 
                 { 
                     new SampleChildObject1 { Hi = 1, },
@@ -88,6 +90,7 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
             {
                 Id = 1,
                 Name = "Test",
+                BinaryData = new byte[] { 1, 2, 3 },
                 ChildArray = new[] 
                 { 
                     new SampleChildObject1 { Hi = 1, },
@@ -149,6 +152,29 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
                 StringAssert.Contains("\"3\"", diff.ToString());
                 StringAssert.Contains("\"22\"", diff.ToString());
             }
+        }
+
+        [Test]
+        public void FindDifferences_SampleObject1_DifferentBinaryValues()
+        {
+            var a = new SampleObject1
+            {
+                Id = 1,
+                Name = "Test",
+                BinaryData = new byte[] { 1, 2, 3}
+            };
+            var b = new SampleObject1
+            {
+                Id = 1,
+                Name = "Test",
+                BinaryData = new byte[] { 1, 2, 2 }
+            };
+            var differences = objectComparer.FindDifferences(a, b).ToList();
+            Assert.AreEqual(1, differences.Count);
+
+            var diff = differences.Single();
+            StringAssert.Contains("\"0x010203\"", diff.ToString());
+            StringAssert.Contains("\"0x010202\"", diff.ToString());
         }
 
         [Test]
@@ -244,6 +270,7 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
         {
             public int Id { get; set; }
             public string Name { get; set; }
+            public byte[] BinaryData { get; set; }
             public SampleChildObject1[] ChildArray { get; set; }
             public ICollection<SampleChildObject1> ChildCollection { get; set; }
         }

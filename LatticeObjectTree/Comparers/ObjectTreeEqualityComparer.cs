@@ -83,7 +83,7 @@ namespace LatticeObjectTree.Comparers
             const int maxLevel = 1000;
             if (level > maxLevel)
             {
-                throw new InvalidOperationException(string.Format("Exceeded max nested object level of {0}", maxLevel));
+                throw new StackOverflowException(string.Format("Exceeded max nested object level of {0}", maxLevel));
             }
 
             int hashCode = 7;
@@ -174,7 +174,7 @@ namespace LatticeObjectTree.Comparers
             const int maxLevel = 1000;
             if (level > maxLevel)
             {
-                throw new InvalidOperationException(string.Format("Exceeded max nested object level of {0}", maxLevel));
+                throw new StackOverflowException(string.Format("Exceeded max nested object level of {0}", maxLevel));
             }
 
             if (expectedNode == null) throw new ArgumentNullException("expected");
@@ -307,6 +307,10 @@ namespace LatticeObjectTree.Comparers
             {
                 return Math.Abs((double)expected - (double)actual) < double.Epsilon;
             }
+            else if (type == typeof(byte[]))
+            {
+                return Enumerable.SequenceEqual(expected as byte[], actual as byte[]);
+            }
             else
             {
                 return Object.Equals(expected, actual);
@@ -331,6 +335,10 @@ namespace LatticeObjectTree.Comparers
             else if (valueType == typeof(double))
             {
                 valueString = ((double)value).ToString("R") + 'd';
+            }
+            else if (valueType == typeof(byte[]))
+            {
+                valueString = "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
             }
             else
             {
