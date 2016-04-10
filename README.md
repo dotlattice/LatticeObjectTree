@@ -1,6 +1,24 @@
 # LatticeObjectTree [![Build status](https://ci.appveyor.com/api/projects/status/uptdctnkaitlyslg)](https://ci.appveyor.com/project/dotlattice/latticeobjecttree)
 
-LatticeObjectTree is a .NET library for working with a tree of objects.  The primary use that this library was designed for is comparing two objects to each other recursively, but it can also be used for many other purposes.
+LatticeObjectTree is a .NET library for working with a tree of objects.  Its main purpose is to compare two objects to each other recursively.
+
+## Quick Start
+The most common way to use this library is as an assertion framework with the `ObjectTreeAssert` class.  Here's an example that will throw an exception:
+
+```c#
+using LatticeObjectTree.Asserts;
+ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2});
+```
+
+In a slightly more advanced use, filtering is supported to ignore parts of the object.  Here's the same example with filtering that will not throw an exception:
+
+```c#
+using LatticeObjectTree.Asserts;
+ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2}, new LatticeObjectTree.ObjectTreeNodeFilter
+{
+    ExcludedPropertyNames = new[] { "a" }
+});
+```
 
 ## Installation
 
@@ -15,14 +33,12 @@ This entire library is released into the [public domain](https://github.com/dotl
 There is also a separate [NuGet package](https://www.nuget.org/packages/LatticeObjectTree.NUnit/) for using the object comparisons in NUnit test assertions.  For more on that see the [NUnit](#nunit) section.
 
 ## Object Comparison
-
 The primary function of this library is to support recursive object comparisons.
 
 Here's a basic example of comparing two anonymous objects:
 
 ```c#
-var comparer = new ObjectTreeEqualityComparer();
-var differences = comparer.FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2});
+var differences = new ObjectTreeEqualityComparer().FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2});
 ```
 
 That comparison will give you a list of differences.  For this example, that looks like this:
@@ -47,7 +63,7 @@ new ObjectTreeNodeFilter
 }
 ```
 
-Once you've created a filter, you can pass it into most of the methods for working with object trees as optional parameter.  For example, to use a filter with the ObjectTreeEqualityComparer:
+Once you've created a filter, you can pass it into most of the methods for working with object trees as optional parameter.  For example, to use a filter with the `ObjectTreeEqualityComparer` class:
 
 ```c#
 var comparer = new ObjectTreeEqualityComparer();
@@ -59,7 +75,7 @@ var differences = comparer.FindDifferences(new { a = 1, b = 2 }, new { a = 2, b 
 
 In this example, the anonymous objects will be compared and no differences will be found because the "a" properties are excluded.
 
-There are also more ways to filter than by just property name.  In real life,  you'll often want to exclude a specific property from a specific type.  That can be done like using the "ExcludedProperties" filter option:
+There are also more ways to filter than by just property name.  In real life,  you'll often want to exclude a specific property from a specific type.  That can be done like using the `ExcludedProperties` filter option:
 
 ```c#
 new ObjectTreeNodeFilter
@@ -83,7 +99,7 @@ new ObjectTreeNodeFilter
 })
 ```
 
-If you need even more control, there is an "ExcludedPropertyPredicates" option that uses predicate functions.  Here's an example that filters out any properties with an "a" in its name:
+If you need even more control, there is an `ExcludedPropertyPredicates` option that uses predicate functions.  Here's an example that filters out any properties with an "a" in its name:
 
 ```c#
 new ObjectTreeNodeFilter
@@ -95,7 +111,7 @@ new ObjectTreeNodeFilter
 });
 ```
 
-And the final option that gives you the most control is the "ExcludedNodePredicates" option.  This is a list of predicates that work on nodes (instead of properties), so you can base your filter on the context of an object in the tree.  Here's an example that limits the depth of the tree:
+And the final option that gives you the most control is the `ExcludedNodePredicates` option.  This is a list of predicates that work on nodes (instead of properties), so you can base your filter on the context of an object in the tree.  Here's an example that limits the depth of the tree:
 
 ```c#
 new ObjectTreeNodeFilter
@@ -107,7 +123,7 @@ new ObjectTreeNodeFilter
 });
 ```
 
-And if you still can't create the filter you want with those options, then you can write your own completely custom filter.  Everything in the ObjectTree library works with the IObjectTreeNodeFilter interface, so you can implement that in your own class to create any kind of filter:
+And if you still can't create the filter you want with those options, then you can write your own completely custom filter.  Everything in the ObjectTree library works with the `IObjectTreeNodeFilter` interface, so you can implement that in your own class to create any kind of filter:
 
 ```c#
 public interface IObjectTreeNodeFilter
@@ -118,7 +134,7 @@ public interface IObjectTreeNodeFilter
 
 ## Object Tree
 
-While the primary use case of this library is for comparing objects, you can also use the ObjectTree classes directly for all kinds of purposes.
+While the primary use case of this library is for comparing objects, you can also use the `ObjectTree` class directly for all kinds of purposes.
 
 Here's a very basic example of creating an ObjectTree directly:
 
@@ -187,8 +203,8 @@ Here's a visualization of the tree for this person:
 
 There are two main parts to an object tree:
 
-* Nodes - the values (boxes in the diagram).  In this example, there is a node for each Person object and for each "Name" string.
-* Paths - the connections between nodes (lines in the diagram).  In this example, all of the paths are properties (the "Name" property and the "BestFriend" property).
+* Nodes - the values (boxes in the diagram).  In this example, there is a node for each Person object and for each `Name` string.
+* Paths - the connections between nodes (lines in the diagram).  In this example, all of the paths are properties (the `Name` property and the `BestFriend` property).
 
 To use the tree, you can iterate through these nodes and the paths that connect them:
 
@@ -276,10 +292,10 @@ Because of that cycle, you would get into an infinite loop if you tried to itera
 
 So what do we do to avoid that?  When a reference to an object that is already in the tree is found, a different type of object node is created for it.  There are two special things about this node:
 
-* The "ChildNodes" property is always an empty enumerable
-* The "OriginalNode" property is set to the first node that was created for the value
+* The `ChildNodes` property is always an empty enumerable
+* The `OriginalNode` property is set to the first node that was created for the value
 
-So because its "ChildNodes" property of the duplicate node will be empty, you won't get into an infinite loop if you try to iterate through the tree.  And because the "OriginalNode" property is set, you can detect that this node is a duplicate and do any special handling you might need for a duplicate value.
+So because its `ChildNodes` property of the duplicate node will be empty, you won't get into an infinite loop if you try to iterate through the tree.  And because the `OriginalNode` property is set, you can detect that this node is a duplicate and do any special handling you might need for a duplicate value.
 
 
 ## Extensibility
@@ -289,7 +305,7 @@ There are many different ways that a tree could be created and used for an objec
 
 ### Spawn Strategies
 
-An ObjectTree node is in charge of creating its own child elements, and the ObjectTreeNode class does this using an implementation of the IObjectTreeSpawnStrategy interface.
+An ObjectTree node is in charge of creating its own child elements, and the `ObjectTreeNode` class does this using an implementation of the `IObjectTreeSpawnStrategy` interface.
 
 ```c#
 public interface IObjectTreeSpawnStrategy
@@ -305,7 +321,7 @@ There are four spawn strategies included in the library by default:
 * BasicObjectTreeSpawnStrategy
     * The most basic, core spawn strategy
     * Looks at the type of the node's value and creates child nodes based on the public properties and fields in that type.
-  * Does not include any cycle detection or filtering support.
+    * Does not include any cycle detection or filtering support.
 * DuplicateCheckingObjectTreeSpawnStrategy
 	* The default strategy used by an ObjectTreeNode
 	* Delegates the actual child node creation to another spawn strategy (BasicObjectTreeSpawnStrategy by default).
@@ -318,11 +334,11 @@ There are four spawn strategies included in the library by default:
 	* A special spawn strategy that always returns an empty list of nodes.
 	* Used for duplicate nodes created by the DuplicateCheckingObjectTreeSpawnStrategy
 
-If you need to implement your own spawn strategy, you can base it on one of these or create a completely independent one that implements the IObjectTreeSpawnStrategy interface.
+If you need to implement your own spawn strategy, you can base it on one of these or create a completely independent one that implements the `IObjectTreeSpawnStrategy` interface.
 
 ### Filters
 
-The filters in this library are all based on the IObjectTreeNodeFilter interface:
+The filters in this library are all based on the `IObjectTreeNodeFilter` interface:
 
 ```c#
 public interface IObjectTreeNodeFilter
@@ -331,18 +347,16 @@ public interface IObjectTreeNodeFilter
 }
 ```
 
-The filter included in the library is the ObjectTreeNodeFilter class.  By default it accepts every node except the ones that you specifically exclude.  See the [Filtering](#filtering) section for more details.
+The filter included in the library is the `ObjectTreeNodeFilter` class.  By default it accepts every node except the ones that you specifically exclude.  See the [Filtering](#filtering) section for more details.
 
 But there are lots of other ways you could filter properties.  For example, you may want to exclude all nodes except the ones that you explicitly include.  To do something like that, you can implement the interface with your own class and use it anywhere that you could use the default filter.
 
 
 ### Edges
 
-The edges in an object tree are the links between the object nodes.  The edges in an ObjectTree are implementations of the IObjectTreeEdge.
+The edges in an object tree are the links between the object nodes.
 
-By default, an ObjectTree is constructed using the DefaultObjectTreeEdge for its edges.  This works great if all of your edges are either properties, fields, or indexes in some kind of enumerable.
-
-An interface was used for these edges to account for the possibility of having some other kind of link between nodes.  So you can consider creating your own implementation of the IObjectTreeEdge interface if the default class doesn't have enough information in it for your purposes.
+By default, an `ObjectTree` is constructed using the `ObjectTreeEdge` class for its edges.  This works great if all of your edges are either properties, fields, or indexes in some kind of enumerable.  You could also create a subclass of the `ObjectTreeEdge` to account for the possibility of having some other kind of link between nodes.
 
 
 ## NUnit

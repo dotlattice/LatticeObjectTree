@@ -10,10 +10,6 @@ namespace LatticeObjectTree.Comparers
     /// </summary>
     public class ObjectTreeNodeDifference
     {
-        private readonly ObjectTreeNode expected;
-        private readonly ObjectTreeNode actual;
-        private readonly string message;
-
         /// <summary>
         /// Constructs a difference for the specified expected and actual nodes.
         /// </summary>
@@ -22,33 +18,36 @@ namespace LatticeObjectTree.Comparers
         /// <param name="message">describes the difference between the nodes</param>
         public ObjectTreeNodeDifference(ObjectTreeNode expected, ObjectTreeNode actual, string message)
         {
-            if (expected == null) throw new ArgumentNullException("expected");
-            if (actual == null) throw new ArgumentNullException("actual");
+            if (expected == null) throw new ArgumentNullException(nameof(expected));
+            if (actual == null) throw new ArgumentNullException(nameof(actual));
 
-            this.expected = expected;
-            this.actual = actual;
-            this.message = message ?? string.Empty;
+            Expected = expected;
+            Actual = actual;
+            Message = message ?? string.Empty;
         }
 
         /// <summary>
         /// The node that was expected.
         /// </summary>
-        public ObjectTreeNode Expected { get { return expected; } }
+        public ObjectTreeNode Expected { get; }
 
         /// <summary>
         /// The node that was actually in the object tree.
         /// </summary>
-        public ObjectTreeNode Actual { get { return actual; } }
+        public ObjectTreeNode Actual { get; }
 
         /// <summary>
         /// A message describing the difference between the nodes.  This may be blank, but it will never be null.
         /// </summary>
-        public string Message { get { return message; } }
+        public string Message { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns a description of the difference betwen the expected and actual nodes.
+        /// </summary>
+        /// <returns>the string representation of this difference</returns>
         public override string ToString()
         {
-            return message;
+            return Message;
         }
     }
 }

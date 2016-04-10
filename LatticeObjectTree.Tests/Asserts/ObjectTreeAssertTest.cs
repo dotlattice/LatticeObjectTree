@@ -1,18 +1,132 @@
-﻿using LatticeObjectTree.NUnit;
-using LatticeObjectTree.NUnit.Constraints;
-using LatticeUtils;
+﻿using LatticeUtils;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace LatticeObjectTree.UnitTests.NUnit
+namespace LatticeObjectTree.Asserts
 {
-    public class TestObjectTreeAssertSampleObjects
+    public class ObjectTreeAssertTest
     {
+        [Test]
+        public void AreEqual_CompareObjectToItself()
+        {
+            var obj = new object();
+            ObjectTreeAssert.AreEqual(obj, obj);
+        }
+
+        [Test]
+        public void AreNotEqual_TwoDifferentObjects()
+        {
+            ObjectTreeAssert.AreNotEqual(new object(), new object());
+        }
+
+        #region Messages
+
+        [Test]
+        public void AreEqualFail_DifferentStrings()
+        {
+            var expected = "hello";
+            var actual = "world";
+            var expectedException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(expected, actual));
+
+            var expectedMessage = "ObjectTreeAssert.AreEqual() Failure" + Environment.NewLine
+                + "Expected: \"hello\"" + Environment.NewLine
+                + "Actual:   \"world\"" + Environment.NewLine
+                + "1 Difference:" + Environment.NewLine
+                + "\t<root>: expected value \"hello\" but was \"world\".";
+            Assert.AreEqual(expectedMessage, expectedException.Message);
+        }
+
+        [Test]
+        public void AreEqualFail_DifferentAnonymousObjects()
+        {
+            var expected = new { id = 1, message = "hello" };
+            var actual = new { id = 2, message = "world" };
+            var expectedException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(expected, actual));
+
+            var expectedMessage = "ObjectTreeAssert.AreEqual() Failure" + Environment.NewLine
+                + "Expected: \"{ id = 1, message = hello }\"" + Environment.NewLine
+                + "Actual:   \"{ id = 2, message = world }\"" + Environment.NewLine
+                + "2 Differences:" + Environment.NewLine
+                + "\t<root>.id: expected value 1 but was 2." + Environment.NewLine
+                + "\t<root>.message: expected value \"hello\" but was \"world\".";
+            Assert.AreEqual(expectedMessage, expectedException.Message);
+        }
+
+        [Test]
+        public void AreEqualFail_DifferentCustomObjects()
+        {
+            var expected = new Company { Id = 1, Name = "hello" };
+            var actual = new Company { Id = 2, Name = "world" };
+            var expectedException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(expected, actual));
+
+            var expectedMessage = "ObjectTreeAssert.AreEqual() Failure" + Environment.NewLine
+                + "Expected: \"LatticeObjectTree.Asserts.ObjectTreeAssertTest+Company\"" + Environment.NewLine
+                + "Actual:   \"LatticeObjectTree.Asserts.ObjectTreeAssertTest+Company\"" + Environment.NewLine
+                + "2 Differences:" + Environment.NewLine
+                + "\t<root>.Id: expected value 1 but was 2." + Environment.NewLine
+                + "\t<root>.Name: expected value \"hello\" but was \"world\".";
+
+            Assert.AreEqual(expectedMessage, expectedException.Message);
+        }
+
+        [Test]
+        public void AreEqualFail_DifferentLists()
+        {
+            var expected = new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+            var actual = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 };
+            var expectedException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(expected, actual));
+
+            var expectedMessage = "ObjectTreeAssert.AreEqual() Failure" + Environment.NewLine
+                 + "Expected: \"System.Int32[]\"" + Environment.NewLine
+                 + "Actual:   \"System.Int32[]\"" + Environment.NewLine
+                 + "26 Differences:" + Environment.NewLine
+                 + "	<root>[0]: expected value 0 but was 1." + Environment.NewLine
+                 + "	<root>[1]: expected value 1 but was 2." + Environment.NewLine
+                 + "	<root>[2]: expected value 2 but was 3." + Environment.NewLine
+                 + "	<root>[3]: expected value 3 but was 4." + Environment.NewLine
+                 + "	<root>[4]: expected value 4 but was 5." + Environment.NewLine
+                 + "	<root>[5]: expected value 5 but was 6." + Environment.NewLine
+                 + "	<root>[6]: expected value 6 but was 7." + Environment.NewLine
+                 + "	<root>[7]: expected value 7 but was 8." + Environment.NewLine
+                 + "	<root>[8]: expected value 8 but was 9." + Environment.NewLine
+                 + "	<root>[9]: expected value 9 but was 10." + Environment.NewLine
+                 + "	<root>[10]: expected value 10 but was 11." + Environment.NewLine
+                 + "	<root>[11]: expected value 11 but was 12." + Environment.NewLine
+                 + "	<root>[12]: expected value 12 but was 13." + Environment.NewLine
+                 + "	<root>[13]: expected value 13 but was 14." + Environment.NewLine
+                 + "	<root>[14]: expected value 14 but was 15." + Environment.NewLine
+                 + "	<root>[15]: expected value 15 but was 16." + Environment.NewLine
+                 + "	<root>[16]: expected value 16 but was 17." + Environment.NewLine
+                 + "	<root>[17]: expected value 17 but was 18." + Environment.NewLine
+                 + "	<root>[18]: expected value 18 but was 19." + Environment.NewLine
+                 + "	<root>[19]: expected value 19 but was 20." + Environment.NewLine
+                 + "	<root>[20]: expected value 20 but was 21." + Environment.NewLine
+                 + "	<root>[21]: expected value 21 but was 22." + Environment.NewLine
+                 + "	<root>[22]: expected value 22 but was 23." + Environment.NewLine
+                 + "	<root>[23]: expected value 23 but was 24." + Environment.NewLine
+                 + "	<root>[24]: expected value 24 but was 25." + Environment.NewLine
+                 + "	<root>[25]: expected value 25 but was 26.";
+            Assert.AreEqual(expectedMessage, expectedException.Message);
+        }
+
+        [Test]
+        public void AreNotEqualFail_SameString()
+        {
+            var expected = "hello";
+            var actual = "hello";
+            var expectedException = Assert.Throws<ObjectTreeNotEqualException>(() => ObjectTreeAssert.AreNotEqual(expected, actual));
+
+            var expectedMessage = "ObjectTreeAssert.AreNotEqual() Failure" + Environment.NewLine
+                + "Expected: \"hello\"" + Environment.NewLine
+                + "Actual:   \"hello\"";
+            Assert.AreEqual(expectedMessage, expectedException.Message);
+        }
+
+        #endregion
+
         [Test]
         public void EqualAddresses()
         {
@@ -41,7 +155,7 @@ namespace LatticeObjectTree.UnitTests.NUnit
                 ExcludedProperties = new[] { ReflectionUtils.Property<Address>(x => x.Lines) },
             });
 
-            var assertionException = Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(a, b));
+            var assertionException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(a, b));
             StringAssert.Contains("1 Difference", assertionException.ToString());
             StringAssert.Contains("123 Fake ST", assertionException.ToString());
             StringAssert.Contains("321 Fake ST", assertionException.ToString());
@@ -83,31 +197,31 @@ namespace LatticeObjectTree.UnitTests.NUnit
             });
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedPropertyPredicates = new Func<PropertyInfo, bool>[] 
-                { 
+                ExcludedPropertyPredicates = new Func<PropertyInfo, bool>[]
+                {
                     (propertyInfo) => propertyInfo.Name.Contains("Name"),
                 }
             });
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedNodePredicates = new Func<ObjectTreeNode, bool>[] 
-                { 
-                    (node) => 
+                ExcludedNodePredicates = new Func<ObjectTreeNode, bool>[]
+                {
+                    (node) =>
                         node.ParentNode != null && node.ParentNode.Value is Employee && ((Employee)node.ParentNode.Value).Id == 2
                         && node.EdgeFromParent != null && node.EdgeFromParent.Member.Name.Contains("Name")
                 }
             });
             AssertAreNotEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedNodePredicates = new Func<ObjectTreeNode, bool>[] 
-                { 
-                    (node) => 
+                ExcludedNodePredicates = new Func<ObjectTreeNode, bool>[]
+                {
+                    (node) =>
                         node.ParentNode != null && node.ParentNode.Value is Employee && ((Employee)node.ParentNode.Value).Id == 1
                         && node.EdgeFromParent != null && node.EdgeFromParent.Member.Name.Contains("Name")
                 }
             });
 
-            var assertionException = Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(a, b));
+            var assertionException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(a, b));
             StringAssert.Contains("1 Difference", assertionException.ToString());
             StringAssert.Contains("Robert Paulson", assertionException.ToString());
             StringAssert.Contains("Robert Plant", assertionException.ToString());
@@ -162,7 +276,7 @@ namespace LatticeObjectTree.UnitTests.NUnit
         {
             var obj1 = new ListTestObject<string>()
             {
-                Enumerable = new[] { "test"},
+                Enumerable = new[] { "test" },
                 ReadOnlyCollection = new[] { "test2", "test22" },
                 Collection = new[] { "test3" },
                 Array = new[] { "test4" },
@@ -230,41 +344,25 @@ namespace LatticeObjectTree.UnitTests.NUnit
         private void AssertAreEqual(object expected, object actual)
         {
             ObjectTreeAssert.AreEqual(expected, actual);
-            Assert.That(actual, IsObjectTree.EqualTo(expected));
-
-            Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreNotEqual(expected, actual));
-            Assert.Throws<AssertionException>(() => Assert.That(actual, IsObjectTree.NotEqualTo(expected)));
-            Assert.Throws<AssertionException>(() => Assert.That(actual, Is.Not.ObjectTreeEqualTo(expected)));
+            Assert.Throws<ObjectTreeNotEqualException>(() => ObjectTreeAssert.AreNotEqual(expected, actual));
         }
 
         private void AssertAreEqual(object expected, object actual, IObjectTreeNodeFilter nodeFilter)
         {
             ObjectTreeAssert.AreEqual(expected, actual, nodeFilter);
-            Assert.That(actual, IsObjectTree.EqualTo(expected).WithFilter(nodeFilter));
-
-            Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreNotEqual(expected, actual, nodeFilter));
-            Assert.Throws<AssertionException>(() => Assert.That(actual, IsObjectTree.NotEqualTo(expected).WithFilter(nodeFilter)));
-            Assert.Throws<AssertionException>(() => Assert.That(actual, Is.Not.ObjectTreeEqualTo(expected).WithFilter(nodeFilter)));
+            Assert.Throws<ObjectTreeNotEqualException>(() => ObjectTreeAssert.AreNotEqual(expected, actual, nodeFilter));
         }
 
         private void AssertAreNotEqual(object expected, object actual)
         {
             ObjectTreeAssert.AreNotEqual(expected, actual);
-            Assert.That(actual, IsObjectTree.NotEqualTo(expected));
-            Assert.That(actual, Is.Not.ObjectTreeEqualTo(expected));
-
-            Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(expected, actual));
-            Assert.Throws<AssertionException>(() => Assert.That(actual, IsObjectTree.EqualTo(expected)));
+            Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(expected, actual));
         }
 
         private void AssertAreNotEqual(object expected, object actual, IObjectTreeNodeFilter nodeFilter)
         {
             ObjectTreeAssert.AreNotEqual(expected, actual, nodeFilter);
-            Assert.That(actual, IsObjectTree.NotEqualTo(expected).WithFilter(nodeFilter));
-            Assert.That(actual, Is.Not.ObjectTreeEqualTo(expected).WithFilter(nodeFilter));
-
-            Assert.Throws<AssertionException>(() => ObjectTreeAssert.AreEqual(expected, actual, nodeFilter));
-            Assert.Throws<AssertionException>(() => Assert.That(actual, IsObjectTree.EqualTo(expected).WithFilter(nodeFilter)));
+            Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(expected, actual, nodeFilter));
         }
 
         #endregion
@@ -375,9 +473,9 @@ namespace LatticeObjectTree.UnitTests.NUnit
         {
             public int Id { get; set; }
             public string FullName { get; set; }
-            public Address HomeAddress { get { return (Addresses ?? new Address[0]).FirstOrDefault(a => a.AddressType == AddressType.Home); } }
+            public Address HomeAddress => Addresses?.FirstOrDefault(a => a.AddressType == AddressType.Home);
             public ICollection<Address> Addresses { get; set; }
-            public Phone HomePhone { get { return (Phones ?? new Phone[0]).FirstOrDefault(a => a.PhoneType == PhoneType.Home); } }
+            public Phone HomePhone => Phones?.FirstOrDefault(p => p.PhoneType == PhoneType.Home);
             public ICollection<Phone> Phones { get; set; }
 
             public Person Father { get; set; }
@@ -388,7 +486,9 @@ namespace LatticeObjectTree.UnitTests.NUnit
 
         private class Address
         {
-            public int Id { get; set;
+            public int Id
+            {
+                get; set;
             }
             public AddressType? AddressType { get; set; }
             public ICollection<string> Lines { get; set; }

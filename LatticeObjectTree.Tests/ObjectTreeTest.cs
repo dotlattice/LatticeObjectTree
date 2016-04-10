@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LatticeObjectTree.UnitTests.Core
+namespace LatticeObjectTree
 {
-    public class TestObjectTree
+    public class ObjectTreeTest
     {
         [Test]
         public void Construct_NullValue()
@@ -471,9 +471,9 @@ namespace LatticeObjectTree.UnitTests.Core
 
         #region Private
 
-        private static DefaultObjectTreeEdge GetEdgeFromNode(ObjectTreeNode node)
+        private static ObjectTreeEdge GetEdgeFromNode(ObjectTreeNode node)
         {
-            return (DefaultObjectTreeEdge)node.EdgeFromParent;
+            return (ObjectTreeEdge)node.EdgeFromParent;
         }
 
         #endregion

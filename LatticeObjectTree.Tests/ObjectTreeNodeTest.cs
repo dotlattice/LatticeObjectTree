@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LatticeObjectTree.UnitTests.Core
+namespace LatticeObjectTree
 {
-    public class TestObjectTreeNode
+    public class ObjectTreeNodeTest
     {
         [Test]
         public void ToEdgePath_RootNode()
@@ -19,7 +19,7 @@ namespace LatticeObjectTree.UnitTests.Core
         [Test]
         public void ToEdgePath_OneParentWithIndexEdge()
         {
-            var node = new ObjectTreeNode(null, ObjectTreeNodeType.Object, new ObjectTreeNode(null, ObjectTreeNodeType.Object), new DefaultObjectTreeEdge(0));
+            var node = new ObjectTreeNode(null, ObjectTreeNodeType.Object, new ObjectTreeNode(null, ObjectTreeNodeType.Object), new ObjectTreeEdge(0));
             Assert.AreEqual(1, node.ToEdgePath().Edges.Count);
             Assert.AreEqual(0, node.ToEdgePath().Edges.Single().Index);
         }
@@ -32,9 +32,9 @@ namespace LatticeObjectTree.UnitTests.Core
                 new ObjectTreeNode(null,
                     ObjectTreeNodeType.Object,
                     new ObjectTreeNode(null, ObjectTreeNodeType.Object), 
-                    new DefaultObjectTreeEdge(0)
+                    new ObjectTreeEdge(0)
                 ), 
-                new DefaultObjectTreeEdge(1)
+                new ObjectTreeEdge(1)
             );
             Assert.AreEqual(2, node.ToEdgePath().Edges.Count);
             Assert.AreEqual(0, node.ToEdgePath().Edges.ElementAt(0).Index);

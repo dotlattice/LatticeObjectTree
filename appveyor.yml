@@ -1,0 +1,13 @@
+version: 0.9.5.{build}
+configuration: Release
+platform: Any CPU
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: '{version}'
+build:
+  publish_nuget: true
+  verbosity: minimal
+artifacts:
+- path: LatticeObjectTree\bin\Release\LatticeObjectTree.dll
+- path: LatticeObjectTree\bin\Release\LatticeObjectTree.XML

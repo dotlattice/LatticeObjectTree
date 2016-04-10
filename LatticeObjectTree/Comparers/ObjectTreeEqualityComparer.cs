@@ -1,15 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LatticeObjectTree.Comparers
 {
     /// <summary>
-    /// A comparer for comparing two objects recursively based on their object tree representations.
+    /// Compares two objects recursively based on their object tree representations.
     /// </summary>
-    public class ObjectTreeEqualityComparer : IEqualityComparer<ObjectTree>
+    public class ObjectTreeEqualityComparer : IEqualityComparer<ObjectTree>, IEqualityComparer<object>
     {
+        private readonly IEqualityComparer<object> valueEqualityComparer;
+        private readonly ICustomFormatter valueFormatter;
+
+        /// <summary>
+        /// Constructs a default equality comparer.
+        /// </summary>
+        public ObjectTreeEqualityComparer()
+            : this(valueEqualityComparer: null, valueFormatter: null)
+        {
+        }
+
+        /// <summary>
+        /// Constructs an equality comparer using the specified value comparer and formatter.
+        /// </summary>
+        /// <param name="valueEqualityComparer">the equality comparer for values within the tree, or null to use a default comparer</param>
+        /// <param name="valueFormatter">the formatter for values within the tree, or null to use a default formatter</param>
+        public ObjectTreeEqualityComparer(IEqualityComparer<object> valueEqualityComparer, ICustomFormatter valueFormatter)
+        {
+            if (valueEqualityComparer is ObjectTreeEqualityComparer) throw new ArgumentException($"Cannot use an {nameof(ObjectTreeEqualityComparer)} as a value equality comparer");
+
+            this.valueEqualityComparer = valueEqualityComparer ?? ObjectTreeValueEqualityComparer.Instance;
+            this.valueFormatter = valueFormatter ?? ObjectTreeValueFormatter.Instance;
+        }
+
         #region EqualityComparer
 
         /// <summary>
@@ -17,7 +40,7 @@ namespace LatticeObjectTree.Comparers
         /// </summary>
         /// <param name="x">one of the objects to compare</param>
         /// <param name="y">one of the objects to compare</param>
-        /// <returns>true if the object trees are equal</returns>
+        /// <returns>true if the object tree representation of the two objects are equal</returns>
         public new bool Equals(object x, object y)
         {
             return !FindDifferences(x, y).Any();
@@ -29,7 +52,7 @@ namespace LatticeObjectTree.Comparers
         /// <param name="x">one of the objects to compare</param>
         /// <param name="y">one of the objects to compare</param>
         /// <param name="nodeFilter">a filter to control how the objects are compared</param>
-        /// <returns>true if the filtered object trees are equal</returns>
+        /// <returns>true if the filtered object tree representation of the two objects are equal</returns>
         public bool Equals(object x, object y, IObjectTreeNodeFilter nodeFilter)
         {
             return !FindDifferences(x, y, nodeFilter).Any();
@@ -40,14 +63,14 @@ namespace LatticeObjectTree.Comparers
         /// </summary>
         /// <param name="x">one of the object trees to compare</param>
         /// <param name="y">one of the object trees to compare</param>
-        /// <returns>true if the object trees are equal</returns>
+        /// <returns>true if the two object trees are equal</returns>
         public bool Equals(ObjectTree x, ObjectTree y)
         {
             return !FindDifferences(x, y).Any();
         }
 
         /// <summary>
-        /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
+        /// Returns a hash code for the object based on the hashcode values from each node in its object tree representation.
         /// </summary>
         /// <param name="obj">the object or object tree</param>
         /// <returns>the hashcode of the object</returns>
@@ -57,7 +80,7 @@ namespace LatticeObjectTree.Comparers
         }
 
         /// <summary>
-        /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
+        /// Returns a hash code for the object based on the hashcode values from each node in its object tree representation.
         /// </summary>
         /// <param name="obj">the object or object tree</param>
         /// <param name="filter">the filter to apply to the object tree</param>
@@ -68,10 +91,10 @@ namespace LatticeObjectTree.Comparers
         }
 
         /// <summary>
-        /// Returns a hash code for the object tree based on the hashcode values from each node in the tree.
+        /// Returns a hash code for the object tree based on the hashcode values from each of its nodes.
         /// </summary>
         /// <param name="objTree">the object tree</param>
-        /// <returns>the hashcode of the object tree</returns>
+        /// <returns>the hashcode of the object represented by the tree</returns>
         public int GetHashCode(ObjectTree objTree)
         {
             return GetHashCodeRecursive(new[] { objTree.RootNode }, level: 0);
@@ -83,7 +106,7 @@ namespace LatticeObjectTree.Comparers
             const int maxLevel = 1000;
             if (level > maxLevel)
             {
-                throw new StackOverflowException(string.Format("Exceeded max nested object level of {0}", maxLevel));
+                throw new StackOverflowException($"Exceeded max nested object level of {maxLevel}");
             }
 
             int hashCode = 7;
@@ -102,18 +125,11 @@ namespace LatticeObjectTree.Comparers
                 }
                 else
                 {
-                    hashCode = 31 * hashCode + GetValueHashCode(node.Value);
+                    var valueHashCode = node.Value != null ? valueEqualityComparer.GetHashCode(node.Value) : 0;
+                    hashCode = 31 * hashCode + valueHashCode;
                 }
             }
             return hashCode;
-        }
-
-        /// <summary>
-        /// Returns a hash code for a value from a leaf node of an object tree.
-        /// </summary>
-        protected virtual int GetValueHashCode(object value)
-        {
-            return value != null ? value.GetHashCode() : 0;
         }
 
         #endregion
@@ -121,7 +137,7 @@ namespace LatticeObjectTree.Comparers
         #region Differences
 
         /// <summary>
-        /// Compares the two objects recursively.
+        /// Compares the two objects recursively based on their object tree representations.
         /// </summary>
         /// <param name="expected">the expected object</param>
         /// <param name="actual">the actual object</param>
@@ -132,11 +148,11 @@ namespace LatticeObjectTree.Comparers
         }
 
         /// <summary>
-        /// Compares the two objects recursively.
+        /// Compares the two objects recursively based on their filtered object tree representations.
         /// </summary>
         /// <param name="expected">the expected object</param>
         /// <param name="actual">the actual object</param>
-        /// <param name="nodeFilter">a filter to control how the objects are compared</param>
+        /// <param name="nodeFilter">a filter that controls how the objects are compared</param>
         /// <returns>any differences detected between the two objects</returns>
         public IEnumerable<ObjectTreeNodeDifference> FindDifferences(object expected, object actual, IObjectTreeNodeFilter nodeFilter)
         {
@@ -148,11 +164,11 @@ namespace LatticeObjectTree.Comparers
         /// </summary>
         /// <param name="expected">the tree of the expected object</param>
         /// <param name="actual">the tree of the actual object</param>
-        /// <returns>any differences detected between the two trees</returns>
+        /// <returns>any differences detected between the two object trees</returns>
         public IEnumerable<ObjectTreeNodeDifference> FindDifferences(ObjectTree expected, ObjectTree actual)
         {
-            if (expected == null) throw new ArgumentNullException("expected");
-            if (actual == null) throw new ArgumentNullException("actual");
+            if (expected == null) throw new ArgumentNullException(nameof(expected));
+            if (actual == null) throw new ArgumentNullException(nameof(actual));
 
             return FindDifferences(expected.RootNode, actual.RootNode);
         }
@@ -174,17 +190,17 @@ namespace LatticeObjectTree.Comparers
             const int maxLevel = 1000;
             if (level > maxLevel)
             {
-                throw new StackOverflowException(string.Format("Exceeded max nested object level of {0}", maxLevel));
+                throw new StackOverflowException($"Exceeded max nested object level of {maxLevel}");
             }
 
-            if (expectedNode == null) throw new ArgumentNullException("expected");
-            if (actualNode == null) throw new ArgumentNullException("actual");
+            if (expectedNode == null) throw new ArgumentNullException(nameof(expectedNode));
+            if (actualNode == null) throw new ArgumentNullException(nameof(actualNode));
 
             var expectedPath = expectedNode.ToEdgePath();
             var actualPath = actualNode.ToEdgePath();
             if (expectedPath != actualPath)
             {
-                var message = string.Format("Expected path \"{0}\" but was \"{1}\"", expectedPath, actualPath);
+                var message = $"Expected path \"{expectedPath}\" but was \"{actualPath}\"";
                 yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                 yield break;
             }
@@ -205,7 +221,7 @@ namespace LatticeObjectTree.Comparers
                     object resolvedExpectedOriginalValue;
                     if (actualOriginalNodePath.TryResolve(expectedRoot, out resolvedExpectedOriginalValue) && !AreValuesEqual(resolvedExpectedOriginalValue, actualNode.Value))
                     {
-                        var message = string.Format("{0}: expected value {1} but was {2}.", expectedPath.ToString(), FormatValue(expectedNode.Value), FormatValue(actualNode.Value));
+                        var message = $"{expectedPath}: expected value {FormatValue(expectedNode.Value)} but was {FormatValue(actualNode.Value)}.";
                         yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                         yield break;
                     }
@@ -217,7 +233,7 @@ namespace LatticeObjectTree.Comparers
                     object resolvedActualOriginalValue;
                     if (expectedOriginalNodePath.TryResolve(actualRoot, out resolvedActualOriginalValue) && !AreValuesEqual(resolvedActualOriginalValue, actualNode.Value))
                     {
-                        var message = string.Format("{0}: expected value {1} but was {2}.", expectedPath.ToString(), FormatValue(expectedNode.Value), FormatValue(actualNode.Value));
+                        var message = $"{expectedPath}: expected value {FormatValue(expectedNode.Value)} but was {FormatValue(actualNode.Value)}.";
                         yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                         yield break;
                     }
@@ -228,11 +244,7 @@ namespace LatticeObjectTree.Comparers
 
             if (expectedNode.NodeType != actualNode.NodeType)
             {
-                var message = string.Format("{0}: expected {1} node type but was {2}.",
-                    expectedPath.ToString(),
-                    Enum.GetName(typeof(ObjectTreeNodeType), expectedNode.NodeType),
-                    Enum.GetName(typeof(ObjectTreeNodeType), actualNode.NodeType)
-                );
+                var message = $"{expectedPath}: expected node type {Enum.GetName(typeof(ObjectTreeNodeType), expectedNode.NodeType)} but was {Enum.GetName(typeof(ObjectTreeNodeType), actualNode.NodeType)}.";
                 yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                 yield break;
             }
@@ -241,7 +253,7 @@ namespace LatticeObjectTree.Comparers
             var actualChildren = actualNode.ChildNodes.ToList();
             if (expectedChildren.Count != actualChildren.Count)
             {
-                var message = string.Format("{0}: expected {1} children but had {2} children", expectedPath.ToString(), expectedChildren.Count, actualChildren.Count);
+                var message = $"{expectedPath}: expected {expectedChildren.Count} children but had {actualChildren.Count} children";
                 yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
             }
 
@@ -252,7 +264,7 @@ namespace LatticeObjectTree.Comparers
                     var actualChild = actualChildren.FirstOrDefault(a => Object.Equals(a.EdgeFromParent, expectedChild.EdgeFromParent));
                     if (actualChild == null)
                     {
-                        var message = string.Format("{0}: expected a child at \"{1}\" but did not find one.", expectedPath.ToString(), expectedChild.EdgeFromParent.ToString());
+                        var message = $"{expectedPath}: expected a child at \"{expectedChild.EdgeFromParent}\" but did not find one.";
                         yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                         continue;
                     }
@@ -270,110 +282,12 @@ namespace LatticeObjectTree.Comparers
                 var actualValue = actualNode.Value;
                 if (!AreValuesEqual(expectedValue, actualValue))
                 {
-                    var message = string.Format("{0}: expected value {1} but was {2}.",
-                        expectedPath.ToString(),
-                        FormatValue(expectedValue),
-                        FormatValue(actualValue)
-                    );
+                    var message = $"{expectedPath}: expected value {FormatValue(expectedValue)} but was {FormatValue(actualValue)}.";
                     yield return new ObjectTreeNodeDifference(expectedNode, actualNode, message);
                 }
             }
         }
 
-        /// <summary>
-        /// Compares two values from a leaf node in an object tree.
-        /// </summary>
-        protected virtual bool AreValuesEqual(object expected, object actual)
-        {
-            if (expected == null || actual == null)
-            {
-                return Object.Equals(expected, actual);
-            }
-
-            var expectedType = expected.GetType();
-            var actualType = actual.GetType();
-            if (expectedType != actualType)
-            {
-                return Object.Equals(expected, actual);
-            }
-
-            // Special handling for a few types
-            var type = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
-            if (type == typeof(float))
-            {
-                return Math.Abs((float)expected - (float)actual) < float.Epsilon;
-            }
-            else if (type == typeof(double))
-            {
-                return Math.Abs((double)expected - (double)actual) < double.Epsilon;
-            }
-            else if (type == typeof(byte[]))
-            {
-                return Enumerable.SequenceEqual(expected as byte[], actual as byte[]);
-            }
-            else
-            {
-                return Object.Equals(expected, actual);
-            }
-        }
-
-        /// <summary>
-        /// Formats a value for use in a the message in a <c>ObjectTreeNodeDifference</c>.
-        /// </summary>
-        protected virtual string FormatValue(object value)
-        {
-            if (value == null) return "null";
-
-            var valueType = value.GetType();
-            valueType = Nullable.GetUnderlyingType(valueType) ?? valueType;
-
-            string valueString;
-            if (valueType == typeof(float))
-            {
-                valueString = ((float)value).ToString("R") + 'f';
-            }
-            else if (valueType == typeof(double))
-            {
-                valueString = ((double)value).ToString("R") + 'd';
-            }
-            else if (valueType == typeof(byte[]))
-            {
-                valueString = "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
-            }
-            else
-            {
-                valueString = value.ToString();
-                if (valueType == typeof(decimal))
-                {
-                    valueString += 'm';
-                }
-                else if (valueType == typeof(bool))
-                {
-                    valueString = valueString.ToLower();
-                }
-                else if (valueType.IsEnum)
-                {
-                    valueString = valueType.Name + "." + valueString;
-                }
-            }
-
-            // If the string contains any "special" characters, then we'll use the verbatim string literal syntax.
-            char[] specialCharacters = new[] { '\'', '"', '\n', '\r', '\t', '\0', '\a', '\b', '\f', '\v' };
-            if (valueString.Any(specialCharacters.Contains))
-            {
-                valueString = "@\"" + valueString.Replace("\"", "\"\"") + "\"";
-            }
-            else
-            {
-                valueString = "\"" + valueString + "\"";
-            }
-
-            return valueString;
-        }
-
-        /// <summary>
-        /// Returns the root of the tree that the specified node is in.
-        /// </summary>
         private static ObjectTreeNode GetRootNode(ObjectTreeNode node)
         {
             var ancestorNode = node;
@@ -382,6 +296,16 @@ namespace LatticeObjectTree.Comparers
                 ancestorNode = ancestorNode.ParentNode;
             }
             return ancestorNode;
+        }
+
+        private bool AreValuesEqual(object expected, object actual)
+        {
+            return valueEqualityComparer.Equals(expected, actual);
+        }
+
+        private string FormatValue(object value)
+        {
+            return valueFormatter.Format(format: null, arg: value, formatProvider: null);
         }
 
         #endregion

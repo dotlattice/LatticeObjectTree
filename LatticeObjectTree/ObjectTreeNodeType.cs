@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LatticeObjectTree
 {
     /// <summary>
-    /// The type of a node in an object tree.
+    /// The type of an <see cref="ObjectTreeNode"/>.
     /// </summary>
     public enum ObjectTreeNodeType
     {

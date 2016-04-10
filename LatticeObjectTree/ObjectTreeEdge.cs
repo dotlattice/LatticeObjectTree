@@ -2,31 +2,89 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LatticeObjectTree
 {
     /// <summary>
     /// An edge in an object tree that connects one node to another.
     /// </summary>
-    public interface IObjectTreeEdge
+    public class ObjectTreeEdge : IEquatable<ObjectTreeEdge>
     {
+        /// <summary>
+        /// Constructs an empty edge.
+        /// </summary>
+        public ObjectTreeEdge()
+            : this(member: null, index: default(int?))
+        { }
+
+        /// <summary>
+        /// Constructs an edge for the specified member (such as a property or field).
+        /// </summary>
+        /// <param name="member">the member used to access the node from its parent</param>
+        /// <exception cref="ArgumentNullException">if the member is null</exception>
+        public ObjectTreeEdge(MemberInfo member)
+            : this(member: member, index: default(int?))
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+        }
+
+        /// <summary>
+        /// Constructs an edge for the specified index (such as a list element index).
+        /// </summary>
+        /// <param name="index">the index of the element in a list</param>
+        /// <exception cref="ArgumentOutOfRangeException">if the index is negative</exception>
+        public ObjectTreeEdge(int index)
+            : this(member: null, index: index)
+        {
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), index, $"{nameof(index)} cannot be negative");
+        }
+
+        /// <summary>
+        /// Constructs an edge for the specified member and/or index.
+        /// </summary>
+        /// <param name="member">the member used to access the node from its parent</param>
+        /// <param name="index">the index of the element in a list</param>
+        protected ObjectTreeEdge(MemberInfo member, int? index)
+        {
+            this.Member = member;
+            this.Index = index;
+        }
+
         /// <summary>
         /// The member of this edge, or null if there is no member associated with this edge.
         /// </summary>
-        MemberInfo Member { get; }
+        public MemberInfo Member { get; }
 
         /// <summary>
         /// The type that all values from this edge must have (as either its actual type or an ancestor of its type), 
         /// or null if there is no known type constraint. For example, this could be a property or field type.
         /// </summary>
-        Type MemberType { get; }
+        public Type MemberType => PropertyType ?? FieldType;
+
+        /// <summary>
+        /// The property that this edge represents, or null if this edge does not represent a property.
+        /// </summary>
+        public PropertyInfo Property => Member as PropertyInfo;
+
+        /// <summary>
+        /// The <c>PropertyType</c> of the <c>Property</c>, or null if the <c>Property</c> is null.
+        /// </summary>
+        public Type PropertyType => Property?.PropertyType;
+
+        /// <summary>
+        /// The field that this edge represents, or null if this edge does not represent a field.
+        /// </summary>
+        public FieldInfo Field => Member as FieldInfo;
+
+        /// <summary>
+        /// The <c>FieldType</c> of the <c>Field</c>, or null if the <c>Field</c> is null.
+        /// </summary>
+        public Type FieldType => Field?.FieldType;
 
         /// <summary>
         /// The index to this node (for something like an array or other collection), or null if there is no index associated with this edge.
         /// </summary>
-        int? Index { get; }
+        public int? Index { get; }
 
         /// <summary>
         /// Tries to resolve this edge on the specified parent object.
@@ -34,116 +92,9 @@ namespace LatticeObjectTree
         /// <param name="parentObject">the object on which to apply this edge</param>
         /// <param name="value">the result, or null if the return value is false</param>
         /// <returns>true if the resolution was successful</returns>
-        bool TryResolve(object parentObject, out object value);
-
-        /// <summary>
-        /// Returns the string representation of this edge.
-        /// </summary>
-        /// <returns>the string representation of this edge</returns>
-        string ToString();
-
-        /// <summary>
-        /// Compares two edges for equality such that two edges that always resolve to the same value 
-        /// from any given parent object are considered equal (even if they were created independently).
-        /// </summary>
-        /// <param name="obj">the object to compare to this one</param>
-        /// <returns>true if this edge is equal to the obj</returns>
-        bool Equals(object obj);
-    }
-
-    /// <summary>
-    /// A default implementation of <c>IObjectTreeEdge</c>.
-    /// </summary>
-    public class DefaultObjectTreeEdge : IObjectTreeEdge, IEquatable<DefaultObjectTreeEdge>
-    {
-        private readonly MemberInfo member;
-        private readonly int? index;
-
-        /// <summary>
-        /// Constructs an empty edge.
-        /// </summary>
-        public DefaultObjectTreeEdge() { }
-
-        /// <summary>
-        /// Constructs an edge for the specified member (such as a property or field).
-        /// </summary>
-        /// <param name="member">the member used to access the node from its parent</param>
-        public DefaultObjectTreeEdge(MemberInfo member)
+        public virtual bool TryResolve(object parentObject, out object value)
         {
-            this.member = member;
-        }
-
-        /// <summary>
-        /// Constructs an edge for the specified index (such as a list element index).
-        /// </summary>
-        /// <param name="index">the index of the element in a list</param>
-        public DefaultObjectTreeEdge(int index)
-        {
-            if (index < 0) throw new ArgumentOutOfRangeException("index", index, "index cannot be negative");
-            this.index = index;
-        }
-
-        /// <inheritdoc />
-        public MemberInfo Member { get { return member; } }
-
-        /// <inheritdoc />
-        public Type MemberType
-        {
-            get
-            {
-                return PropertyType ?? FieldType;
-            }
-        }
-
-        #region Property
-
-        /// <summary>
-        /// The property that this edge represents, or null if this edge does not represent a property.
-        /// </summary>
-        public PropertyInfo Property { get { return member as PropertyInfo; } }
-
-        /// <summary>
-        /// The <c>PropertyType</c> of the <c>Property</c>, or null if the <c>Property</c> is null.
-        /// </summary>
-        public Type PropertyType
-        {
-            get
-            {
-                var property = Property;
-                return property != null ? property.PropertyType : null;
-            }
-        }
-
-        #endregion
-
-        #region Field
-
-        /// <summary>
-        /// The field that this edge represents, or null if this edge does not represent a field.
-        /// </summary>
-        public FieldInfo Field { get { return member as FieldInfo; } }
-
-        /// <summary>
-        /// The <c>FieldType</c> of the <c>Field</c>, or null if the <c>Field</c> is null.
-        /// </summary>
-        public Type FieldType
-        {
-            get
-            {
-                var field = Field;
-                return field != null ? field.FieldType : null;
-            }
-        }
-
-        #endregion
-
-        /// <inheritdoc />
-        public int? Index { get { return index; } }
-
-        /// <inheritdoc />
-        public virtual bool TryResolve(object parentObject, out object result)
-        {
-            result = null;
+            value = null;
 
             var node = this;
             if (node.Member != null)
@@ -155,20 +106,31 @@ namespace LatticeObjectTree
 
                 var property = node.Property;
                 var field = node.Field;
-                if (property != null)
+                try
                 {
-                    if (node.Index.HasValue)
+                    if (property != null)
                     {
-                        result = property.GetValue(parentObject, new object[] { node.Index.Value });
+                        if (node.Index.HasValue)
+                        {
+                            value = property.GetValue(parentObject, new object[] { node.Index.Value });
+                        }
+                        else
+                        {
+                            value = property.GetValue(parentObject, null);
+                        }
+                    }
+                    else if (field != null)
+                    {
+                        value = field.GetValue(parentObject);
                     }
                     else
                     {
-                        result = property.GetValue(parentObject, null);
+                        return false;
                     }
                 }
-                else if (field != null)
+                catch (TargetException)
                 {
-                    result = field.GetValue(parentObject);
+                    return false;
                 }
             }
             else if (node.Index.HasValue)
@@ -183,11 +145,19 @@ namespace LatticeObjectTree
                 {
                     return false;
                 }
-                result = currentEnumerable.Cast<object>().ElementAt(node.Index.Value);
+
+                try
+                {
+                    value = currentEnumerable.Cast<object>().ElementAt(node.Index.Value);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return false;
+                }
             }
             else
             {
-                result = parentObject;
+                value = parentObject;
             }
 
             return true;
@@ -200,13 +170,13 @@ namespace LatticeObjectTree
         /// <returns>the string representation of this node</returns>
         public override string ToString()
         {
-            if (member != null)
+            if (Member != null)
             {
-                return "." + member.Name;
+                return "." + Member.Name;
             }
-            else if (index.HasValue)
+            else if (Index.HasValue)
             {
-                return "[" + index.Value + "]";
+                return "[" + Index.Value + "]";
             }
             else
             {
@@ -216,10 +186,15 @@ namespace LatticeObjectTree
 
         #region Equality
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Compares two edges for equality such that two edges that always resolve to the same value 
+        /// from any given parent object are considered equal (even if they were created independently).
+        /// </summary>
+        /// <param name="obj">the object to compare to this one</param>
+        /// <returns>true if this edge is equal to the obj</returns>
         public override bool Equals(object obj)
         {
-            return Equals(obj as DefaultObjectTreeEdge);
+            return Equals(obj as ObjectTreeEdge);
         }
 
         /// <summary>
@@ -228,53 +203,54 @@ namespace LatticeObjectTree
         /// </summary>
         /// <param name="other">the edge to compare to this one</param>
         /// <returns>true if this edge is equal to the other edge</returns>
-        public bool Equals(DefaultObjectTreeEdge other)
+        public virtual bool Equals(ObjectTreeEdge other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
             if (other.GetType() != this.GetType()) return false;
 
-            return MemberInfoEqualityComparer.Instance.Equals(member, other.Member)
+            return MemberInfoEqualityComparer.Instance.Equals(Member, other.Member)
                 && Equals(Index, other.Index);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Returns a hash code compatible with the <c>Equals</c> method.
+        /// </summary>
+        /// <returns>the hash code for this edge</returns>
         public override int GetHashCode()
         {
             int hashCode = 7;
             unchecked
             {
-                hashCode = 31 * hashCode + (member != null ? MemberInfoEqualityComparer.Instance.GetHashCode(member) : 0);
+                hashCode = 31 * hashCode + (Member != null ? MemberInfoEqualityComparer.Instance.GetHashCode(Member) : 0);
                 hashCode = 31 * hashCode + Index.GetHashCode();
             }
             return hashCode;
         }
 
         /// <inheritdoc />
-        public static bool operator ==(DefaultObjectTreeEdge left, DefaultObjectTreeEdge right)
+        public static bool operator ==(ObjectTreeEdge left, ObjectTreeEdge right)
         {
             return Equals(left, right);
         }
 
         /// <inheritdoc />
-        public static bool operator !=(DefaultObjectTreeEdge left, DefaultObjectTreeEdge right)
+        public static bool operator !=(ObjectTreeEdge left, ObjectTreeEdge right)
         {
             return !Equals(left, right);
         }
 
-        /// <summary>
-        /// Compares two <c>MemberInfo</c> objects for equality.
-        /// </summary>
         private class MemberInfoEqualityComparer : IEqualityComparer<MemberInfo>
         {
-            public static readonly MemberInfoEqualityComparer Instance = new MemberInfoEqualityComparer();
+            public static MemberInfoEqualityComparer Instance { get; } = new MemberInfoEqualityComparer();
+
             private MemberInfoEqualityComparer() { }
 
             public bool Equals(MemberInfo x, MemberInfo y)
             {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(null, x)) return false;
-                if (ReferenceEquals(null, y)) return false;
+                if (object.ReferenceEquals(x, y)) return true;
+                if (object.ReferenceEquals(null, x)) return false;
+                if (object.ReferenceEquals(null, y)) return false;
                 if (x.GetType() != y.GetType()) return false;
 
                 if (x.Name != y.Name) return false;
@@ -292,10 +268,10 @@ namespace LatticeObjectTree
                 int hashCode = 7;
                 unchecked
                 {
-                    hashCode = 31 * hashCode + (obj.Name != null ? obj.Name.GetHashCode() : 0);
-                    hashCode = 31 * hashCode + (obj.DeclaringType != null ? obj.DeclaringType.GetHashCode() : 0);
+                    hashCode = 31 * hashCode + (obj.Name?.GetHashCode() ?? 0);
+                    hashCode = 31 * hashCode + (obj.DeclaringType?.GetHashCode() ?? 0);
                     hashCode = 31 * hashCode + obj.MetadataToken.GetHashCode();
-                    hashCode = 31 * hashCode + (obj.Module != null ? obj.Module.GetHashCode() : 0);
+                    hashCode = 31 * hashCode + (obj.Module?.GetHashCode() ?? 0);
                 }
                 return hashCode;
             }

@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace LatticeObjectTree
 {
     /// <summary>
-    /// A filter for object tree nodes.
+    /// A filter for <see cref="ObjectTreeNode"/> values.
     /// </summary>
     public interface IObjectTreeNodeFilter
     {
@@ -20,42 +19,35 @@ namespace LatticeObjectTree
     }
 
     /// <summary>
-    /// A filter that uses blacklists to exclude nodes.
+    /// A default filter that uses blacklists to exclude nodes.
     /// </summary>
     public class ObjectTreeNodeFilter : IObjectTreeNodeFilter
     {
         /// <summary>
-        /// Constructs a default filter.
-        /// </summary>
-        public ObjectTreeNodeFilter()
-        {
-            ExcludedPropertyNames = new List<string>();
-            ExcludedProperties = new List<PropertyInfo>();
-            ExcludedPropertyPredicates = new List<Func<PropertyInfo, bool>>();
-            ExcludedNodePredicates = new List<Func<ObjectTreeNode, bool>>();
-        }
-
-        /// <summary>
         /// The case-insensitive names of properties to exclude.
         /// </summary>
-        public ICollection<string> ExcludedPropertyNames { get; set; }
+        public ICollection<string> ExcludedPropertyNames { get; set; } = new string[0];
 
         /// <summary>
         /// Properties to exclude.
         /// </summary>
-        public ICollection<PropertyInfo> ExcludedProperties { get; set; }
+        public ICollection<PropertyInfo> ExcludedProperties { get; set; } = new PropertyInfo[0];
 
         /// <summary>
         /// Predicates that determine whether a property is excluded.
         /// </summary>
-        public ICollection<Func<PropertyInfo, bool>> ExcludedPropertyPredicates { get; set; }
+        public ICollection<Func<PropertyInfo, bool>> ExcludedPropertyPredicates { get; set; } = new Func<PropertyInfo, bool>[0];
 
         /// <summary>
         /// Predicates that determine whether a node is excluded.
         /// </summary>
-        public ICollection<Func<ObjectTreeNode, bool>> ExcludedNodePredicates { get; set; }
+        public ICollection<Func<ObjectTreeNode, bool>> ExcludedNodePredicates { get; set; } = new Func<ObjectTreeNode, bool>[0];
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Applies the filter to the nodes.
+        /// </summary>
+        /// <param name="nodes">the nodes to filter</param>
+        /// <returns>the nodes remaining after the filter is applied</returns>
         public IEnumerable<ObjectTreeNode> Apply(IEnumerable<ObjectTreeNode> nodes)
         {
             var predicates = CreateAllExcludedNodePredicates().ToList();
@@ -63,7 +55,6 @@ namespace LatticeObjectTree
             {
                 return nodes;
             }
-
             return nodes.Where(node => !predicates.Any(predicate => predicate(node)));
         }
 

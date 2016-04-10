@@ -1,39 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LatticeObjectTree
 {
     /// <summary>
-    /// A path of the edges from one object tree node to another.
+    /// A path of the edges from one <see cref="ObjectTreeNode"/> to another.
     /// </summary>
     public class ObjectTreeEdgePath : IEquatable<ObjectTreeEdgePath>
     {
-        private readonly ICollection<IObjectTreeEdge> edges;
-
         /// <summary>
         /// Constructs a path from the specified edges.
         /// </summary>
         /// <param name="edges">the edges in the path</param>
         /// <exception cref="ArgumentNullException">if <c>edges</c> is null</exception>
-        public ObjectTreeEdgePath(IEnumerable<IObjectTreeEdge> edges)
+        public ObjectTreeEdgePath(IEnumerable<ObjectTreeEdge> edges)
         {
-            if (edges == null) throw new ArgumentNullException("edges");
-            this.edges = edges.Where(e => e != null).ToList().AsReadOnly();
+            if (edges == null) throw new ArgumentNullException(nameof(edges));
+            Edges = edges.Where(e => e != null).ToList().AsReadOnly();
         }
 
         /// <summary>
         /// The edges in this path.
         /// </summary>
-        public ICollection<IObjectTreeEdge> Edges { get { return edges; } }
+        public ICollection<ObjectTreeEdge> Edges { get; }
 
         /// <summary>
         /// Tries to resolve this path from the specified root object.
         /// </summary>
-        /// <param name="rootObject">the root object from which to start applying the edges in the path</param>
+        /// <param name="rootObject">the root object from which to apply the path</param>
         /// <param name="value">the leaf object that was resolved</param>
         /// <returns>true if the resolution was successful</returns>
         public virtual bool TryResolve(object rootObject, out object value)
@@ -41,9 +36,9 @@ namespace LatticeObjectTree
             value = null;
 
             var currentObject = rootObject;
-            foreach (var node in edges)
+            foreach (var edge in Edges)
             {
-                if (!node.TryResolve(currentObject, out currentObject))
+                if (!edge.TryResolve(currentObject, out currentObject))
                 {
                     return false;
                 }
@@ -70,7 +65,7 @@ namespace LatticeObjectTree
         /// <returns>the string representation of this path</returns>
         public string ToString(string rootVariableName)
         {
-            return (rootVariableName ?? "<root>") + string.Join(string.Empty, edges.Select(node => node.ToString()));
+            return (rootVariableName ?? "<root>") + string.Join(string.Empty, Edges.Select(node => node.ToString()));
         }
 
         #region Equality
@@ -96,7 +91,7 @@ namespace LatticeObjectTree
             if (ReferenceEquals(this, other)) return true;
             if (other.GetType() != this.GetType()) return false;
 
-            return this.edges.SequenceEqual(other.edges);
+            return this.Edges.SequenceEqual(other.Edges);
         }
 
         /// <inheritdoc />
@@ -105,7 +100,7 @@ namespace LatticeObjectTree
             int hashCode;
             unchecked
             {
-                hashCode = edges.Select(node => node.GetHashCode()).Aggregate(37, (current, nodeHashCode) => (current * 397) ^ nodeHashCode);
+                hashCode = Edges.Select(node => node.GetHashCode()).Aggregate(37, (current, nodeHashCode) => (current * 397) ^ nodeHashCode);
             }
             return hashCode;
         }

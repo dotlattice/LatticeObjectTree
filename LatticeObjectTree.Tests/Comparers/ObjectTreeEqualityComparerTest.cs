@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LatticeObjectTree.UnitTests.Core.Comparers
+namespace LatticeObjectTree.Comparers
 {
-    public class TestObjectTreeEqualityComparer
+    public class ObjectTreeEqualityComparerTest
     {
         private ObjectTreeEqualityComparer objectComparer;
 
@@ -149,8 +149,8 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
             }
             {
                 var diff = differences.ElementAt(1);
-                StringAssert.Contains("\"3\"", diff.ToString());
-                StringAssert.Contains("\"22\"", diff.ToString());
+                StringAssert.Contains("3", diff.ToString());
+                StringAssert.Contains("22", diff.ToString());
             }
         }
 
@@ -173,8 +173,8 @@ namespace LatticeObjectTree.UnitTests.Core.Comparers
             Assert.AreEqual(1, differences.Count);
 
             var diff = differences.Single();
-            StringAssert.Contains("\"0x010203\"", diff.ToString());
-            StringAssert.Contains("\"0x010202\"", diff.ToString());
+            StringAssert.Contains("0x010203", diff.ToString());
+            StringAssert.Contains("0x010202", diff.ToString());
         }
 
         [Test]
