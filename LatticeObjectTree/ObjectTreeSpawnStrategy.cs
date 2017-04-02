@@ -115,7 +115,11 @@ namespace LatticeObjectTree
             foreach (var childNode in childNodes)
             {
                 ObjectTreeNode originalChildNode;
-                if (StoreNodeIfNecessary(childNode, out originalChildNode) || originalChildNode == null)
+                if (childNode.NodeType == ObjectTreeNodeType.Primitive)
+                {
+                    yield return childNode;
+                }
+                else if (StoreNodeIfNecessary(childNode, out originalChildNode) || originalChildNode == null)
                 {
                     yield return childNode;
                 }
@@ -156,6 +160,12 @@ namespace LatticeObjectTree
         /// <returns>true if the node was stored or false if the node's value was already stored</returns>
         private bool StoreNodeIfNecessary(ObjectTreeNode node, out ObjectTreeNode originalNode)
         {
+            if (node.NodeType == ObjectTreeNodeType.Primitive)
+            {
+                originalNode = null;
+                return false;
+            }
+
             var nodeValue = node.Value;
             if (nodeValue == null)
             {
@@ -163,12 +173,12 @@ namespace LatticeObjectTree
                 return false;
             }
 
-            var childValueType = nodeValue.GetType();
-            if (childValueType.IsValueType || childValueType == typeof(string))
-            {
-                originalNode = null;
-                return false;
-            }
+            //var childValueType = nodeValue.GetType();
+            //if (childValueType == typeof(string))
+            //{
+            //    originalNode = null;
+            //    return false;
+            //}
 
             if (!visitedValueToNodeDictionary.TryGetValue(nodeValue, out originalNode))
             {
@@ -288,16 +298,9 @@ namespace LatticeObjectTree
             }
 
             var value = node.Value;
-            var valueType = value != null ? value.GetType() : null;
-            if (valueType == null)
-            {
-                valueType= node.EdgeFromParent != null ? node.EdgeFromParent.MemberType : null;
-            }
-            if (valueType == null)
-            {
-                return Enumerable.Empty<ObjectTreeNode>();
-            }
-
+            var valueType = value?.GetType()
+                ?? node.EdgeFromParent?.MemberType
+                ?? typeof(object);
             valueType = Nullable.GetUnderlyingType(valueType) ?? valueType;
 
             IEnumerable<ObjectTreeNode> childNodeEnumerable;
@@ -366,7 +369,7 @@ namespace LatticeObjectTree
             }
             catch (TargetInvocationException ex)
             {
-                throw new TargetInvocationException($"Property \"{property.Name}\" with declaring type \"{property.DeclaringType.FullName}\"", ex);
+                throw new TargetInvocationException($"Property \"{property.Name}\" with declaring type \"{property.DeclaringType?.FullName}\"", ex);
             }
         }
 
@@ -378,7 +381,7 @@ namespace LatticeObjectTree
             }
             catch (TargetInvocationException ex)
             {
-                throw new TargetInvocationException($"Field \"{field.Name}\" with declaring type \"{field.DeclaringType.FullName}\"", ex);
+                throw new TargetInvocationException($"Field \"{field.Name}\" with declaring type \"{field.DeclaringType?.FullName}\"", ex);
             }
         }
     }

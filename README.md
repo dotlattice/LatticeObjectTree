@@ -1,20 +1,22 @@
 # LatticeObjectTree [![Build status](https://ci.appveyor.com/api/projects/status/uptdctnkaitlyslg)](https://ci.appveyor.com/project/dotlattice/latticeobjecttree)
 
-LatticeObjectTree is a .NET library for working with a tree of objects.  Its main purpose is to compare two objects to each other recursively.
+LatticeObjectTree is a .NET library for working with a tree of objects.
 
 ## Quick Start
-The most common way to use this library is as an assertion framework with the `ObjectTreeAssert` class.  Here's an example that will throw an exception:
+The most common way to use this library is as an assertion framework with the `ObjectTreeAssert` class.  Here's an example:
 
 ```c#
-using LatticeObjectTree.Asserts;
+using LatticeObjectTree;
 ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2});
 ```
 
-In a slightly more advanced use, filtering is supported to ignore parts of the object.  Here's the same example with filtering that will not throw an exception:
+That will throw an exception because the two objects have different values for property "a".
+
+You can also use filtering to ignore parts of the objects.  Here's that same example with a filter to avoid the exception:
 
 ```c#
-using LatticeObjectTree.Asserts;
-ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2}, new LatticeObjectTree.ObjectTreeNodeFilter
+using LatticeObjectTree;
+ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2}, new ObjectTreeNodeFilter
 {
     ExcludedPropertyNames = new[] { "a" }
 });
@@ -22,18 +24,17 @@ ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2}, new Lattice
 
 ## Installation
 
-There are several ways to install this library:
+There are a few ways to start using this library:
 
 * Install the [NuGet package](https://www.nuget.org/packages/LatticeObjectTree/)
 * Download the assembly from the [latest release](https://github.com/dotlattice/LatticeObjectTree/releases/latest) and install it manually
-* Copy the parts you want into your own project
+* Copy the parts you want into your project
 
 This entire library is released into the [public domain](https://github.com/dotlattice/LatticeObjectTree/blob/master/LICENSE).  So you can copy anything from this library into your own project without having to worry about attribution or any of that stuff.
 
-There is also a separate [NuGet package](https://www.nuget.org/packages/LatticeObjectTree.NUnit/) for using the object comparisons in NUnit test assertions.  For more on that see the [NUnit](#nunit) section.
 
 ## Object Comparison
-The primary function of this library is to support recursive object comparisons.
+The primary goal of this library is to support recursive object comparisons.
 
 Here's a basic example of comparing two anonymous objects:
 
@@ -41,7 +42,7 @@ Here's a basic example of comparing two anonymous objects:
 var differences = new ObjectTreeEqualityComparer().FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2});
 ```
 
-That comparison will give you a list of differences.  For this example, that looks like this:
+That comparison will give you a list of differences.  For this example, writing those differences to the console would give you strings like this:
 
 ```
 <root>.a: expected value "1" but was "2".
@@ -52,14 +53,14 @@ By default, these comparisons iterate through the public properties and fields o
 
 ## Filtering
 
-There are often times where you want to compare two objects based on only some of their properties.  This is supported through filter objects.
+There are often times where you want to compare two objects, but you want to exclude a few properties.  That might include things like identity columns from the database, values based on the current time, etc.  
 
-The default filter can be used to exclude properties in several ways.  The simplest is excluding properties by name:
+You can exclude properties using an `ObjectTreeNodeFilter` object.  The simplest way to filter properties is by name:
 
 ```c#
 new ObjectTreeNodeFilter
 {
-    ExcludedPropertyNames = new[] { "Name" }
+    ExcludedPropertyNames = new[] { "PropertyName" }
 }
 ```
 
@@ -75,31 +76,19 @@ var differences = comparer.FindDifferences(new { a = 1, b = 2 }, new { a = 2, b 
 
 In this example, the anonymous objects will be compared and no differences will be found because the "a" properties are excluded.
 
-There are also more ways to filter than by just property name.  In real life,  you'll often want to exclude a specific property from a specific type.  That can be done like using the `ExcludedProperties` filter option:
+There are also more ways to filter than by just property name.  You'll often want to exclude a specific property from a specific type.  That can be done like using the `ExcludedProperties` filter option:
 
 ```c#
 new ObjectTreeNodeFilter
 {
     ExcludedProperties = new[] 
     { 
-        typeof(Person).GetProperty("Name")
-    }
-})
-```
- 
-You can also use an expression-based utility like the [LatticeUtils](https://github.com/dotlattice/LatticeUtils/) ReflectionUtils class for selecting these properties in a way that provides compile-time checking:
-
-```c#
-new ObjectTreeNodeFilter
-{
-    ExcludedProperties = new[] 
-    { 
-        ReflectionUtils.Property<Person>(x => x.FullName)
+        typeof(Person).GetProperty(nameof(Person.Name))
     }
 })
 ```
 
-If you need even more control, there is an `ExcludedPropertyPredicates` option that uses predicate functions.  Here's an example that filters out any properties with an "a" in its name:
+If you want more flexibility, there is an `ExcludedPropertyPredicates` option that uses predicate functions.  Here's an example that filters out any properties with an "a" in its name:
 
 ```c#
 new ObjectTreeNodeFilter
@@ -123,7 +112,7 @@ new ObjectTreeNodeFilter
 });
 ```
 
-And if you still can't create the filter you want with those options, then you can write your own completely custom filter.  Everything in the ObjectTree library works with the `IObjectTreeNodeFilter` interface, so you can implement that in your own class to create any kind of filter:
+If you still can't create the filter you want with those options, then you can write your own completely custom filter.  Everything in the ObjectTree library works with the `IObjectTreeNodeFilter` interface, so you can implement that in your own class to create any kind of filter:
 
 ```c#
 public interface IObjectTreeNodeFilter
@@ -134,9 +123,9 @@ public interface IObjectTreeNodeFilter
 
 ## Object Tree
 
-While the primary use case of this library is for comparing objects, you can also use the `ObjectTree` class directly for all kinds of purposes.
+While the primary goal of this library is to support comparing objects, you can also use the `ObjectTree` class for other purposes.
 
-Here's a very basic example of creating an ObjectTree directly:
+Here's a very basic example of creating an `ObjectTree` directly:
 
 ```c#
 var tree = ObjectTree.Create("hello world");
@@ -288,9 +277,9 @@ With this circular reference, our tree looks like this:
                       +---------+
 ```
 
-Because of that cycle, you would get into an infinite loop if you tried to iterate through this tree without any special handling.
+Because of that cycle, you'd get into an infinite loop if you tried to iterate through this tree without any special handling.
 
-So what do we do to avoid that?  When a reference to an object that is already in the tree is found, a different type of object node is created for it.  There are two special things about this node:
+But don't worry, there's some built-in special handling.  When a reference to an object that is already in the tree is found, a different type of object node is created for it.  There are two special things about this node:
 
 * The `ChildNodes` property is always an empty enumerable
 * The `OriginalNode` property is set to the first node that was created for the value
@@ -305,7 +294,7 @@ There are many different ways that a tree could be created and used for an objec
 
 ### Spawn Strategies
 
-An ObjectTree node is in charge of creating its own child elements, and the `ObjectTreeNode` class does this using an implementation of the `IObjectTreeSpawnStrategy` interface.
+An ObjectTree node is in charge of creating its own child elements, and the `ObjectTreeNode` class does this through of the `IObjectTreeSpawnStrategy` interface.
 
 ```c#
 public interface IObjectTreeSpawnStrategy
@@ -320,21 +309,21 @@ There are four spawn strategies included in the library by default:
 
 * BasicObjectTreeSpawnStrategy
     * The most basic, core spawn strategy
-    * Looks at the type of the node's value and creates child nodes based on the public properties and fields in that type.
-    * Does not include any cycle detection or filtering support.
+    * Looks at the type of the node's value and creates child nodes based on the public properties and fields in that type
+    * Does not include any cycle detection or filtering support
 * DuplicateCheckingObjectTreeSpawnStrategy
 	* The default strategy used by an ObjectTreeNode
-	* Delegates the actual child node creation to another spawn strategy (BasicObjectTreeSpawnStrategy by default).
-	* Stores a copy of every node in the tree as they are encountered for duplicate detection.
-	* Creates a special node with no children when a duplicate value is encountered.
+	* Delegates the actual child node creation to another spawn strategy (`BasicObjectTreeSpawnStrategy` by default)
+	* Stores a copy of every node in the tree as they are encountered for duplicate detection
+	* Creates a special node with no children when a duplicate value is encountered
 * FilteredObjectTreeSpawnStrategy
 	* The default strategy used by an ObjectTreeNode if a filter is specified
-	* Delegates the actual child node creation to another spawn strategy (DuplicateCheckingObjectTreeSpawnStrategy by default), then applies its filter to the results.
+	* Delegates the actual child node creation to another spawn strategy (`DuplicateCheckingObjectTreeSpawnStrategy` by default), then applies its filter to the results
 * EmptyObjectTreeSpawnStrategy
-	* A special spawn strategy that always returns an empty list of nodes.
-	* Used for duplicate nodes created by the DuplicateCheckingObjectTreeSpawnStrategy
+	* A special spawn strategy that always returns an empty list of nodes
+	* Used for duplicate nodes created by the `DuplicateCheckingObjectTreeSpawnStrategy`
 
-If you need to implement your own spawn strategy, you can base it on one of these or create a completely independent one that implements the `IObjectTreeSpawnStrategy` interface.
+If you need to implement your own spawn strategy, you can base it on one of these or create a completely independent one that implements the `IObjectTreeSpawnStrategy` interface directly.
 
 ### Filters
 
@@ -347,7 +336,7 @@ public interface IObjectTreeNodeFilter
 }
 ```
 
-The filter included in the library is the `ObjectTreeNodeFilter` class.  By default it accepts every node except the ones that you specifically exclude.  See the [Filtering](#filtering) section for more details.
+The default filter included in the library is the `ObjectTreeNodeFilter` class.  By default it accepts every node except the ones that you specifically exclude.  See the [Filtering](#filtering) section for more details.
 
 But there are lots of other ways you could filter properties.  For example, you may want to exclude all nodes except the ones that you explicitly include.  To do something like that, you can implement the interface with your own class and use it anywhere that you could use the default filter.
 
@@ -356,40 +345,4 @@ But there are lots of other ways you could filter properties.  For example, you 
 
 The edges in an object tree are the links between the object nodes.
 
-By default, an `ObjectTree` is constructed using the `ObjectTreeEdge` class for its edges.  This works great if all of your edges are either properties, fields, or indexes in some kind of enumerable.  You could also create a subclass of the `ObjectTreeEdge` to account for the possibility of having some other kind of link between nodes.
-
-
-## NUnit
-In addition to the core ObjectTree project, this repository also contains an NUnit project for writing assertions comparing object tree representations of two objects.
-
-Here are some examples of using it:
-
-```c#
-ObjectTreeAssert.AreEqual(expected, actual);
-Assert.That(actual, IsObjectTree.EqualTo(expected));
-```
-
-```c#
-ObjectTreeAssert.AreNotEqual(expected, actual);
-Assert.That(actual, IsObjectTree.NotEqualTo(expected));
-Assert.That(actual, Is.Not.ObjectTreeEqualTo(expected));
-```
-
-You can also use [filters](#filtering) in the assert methods:
-
-```c#
-ObjectTreeAssert.AreEqual(expected, actual, new ObjectTreeNodeFilter
-{
-    ExcludedProperties = new[] 
-    {
-        ReflectionUtils.Property<Person>(x => x.FullName)
-    }
-});
-Assert.That(actual, IsObjectTree.EqualTo(expected).WithFilter(new ObjectTreeNodeFilter
-{
-    ExcludedProperties = new[] 
-    { 
-        ReflectionUtils.Property<Person>(x => x.FullName)
-    }
-}));
-```
+By default, an `ObjectTree` is constructed using the `ObjectTreeEdge` class for its edges.  This works great if all of your edges are either properties, fields, or indexes in some kind of enumerable.  If you need some other kind of link between nodes, you can create a custom subclass of the `ObjectTreeEdge` to support it.

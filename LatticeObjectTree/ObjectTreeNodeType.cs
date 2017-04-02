@@ -15,17 +15,17 @@ namespace LatticeObjectTree
         Unknown,
 
         /// <summary>
-        /// The node is for a primitive value (like an integer, decimal, character, string, etc.)
+        /// For primitive value nodes that won't have child nodes (like an integer, decimal, character, or string).
         /// </summary>
         Primitive,
 
         /// <summary>
-        /// The node is for an object value that may have child nodes.
+        /// For an object value node that may have child nodes.
         /// </summary>
         Object,
 
         /// <summary>
-        /// The node is for a collection or other enumerable that may have child nodes.
+        /// For a collection or other enumerable value node that may have child nodes.
         /// </summary>
         Collection,
     }

@@ -33,14 +33,15 @@
     <DocumentationFile>bin\Release\LatticeObjectTree.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Asserts\ObjectTreeAssertException.cs" />
-    <Compile Include="Asserts\ObjectTreeAssert.cs" />
-    <Compile Include="Asserts\ObjectTreeEqualException.cs" />
-    <Compile Include="Asserts\ObjectTreeNotEqualException.cs" />
-    <Compile Include="Comparers\ObjectTreeEqualityComparer.cs" />
-    <Compile Include="Comparers\ObjectTreeNodeDifference.cs" />
-    <Compile Include="Comparers\ObjectTreeValueEqualityComparer.cs" />
-    <Compile Include="Comparers\ObjectTreeValueFormatter.cs" />
+    <Compile Include="Exceptions\ObjectTreeAssertException.cs" />
+    <Compile Include="Exceptions\ObjectTreeCircularReferenceException.cs" />
+    <Compile Include="ObjectTreeAssert.cs" />
+    <Compile Include="Exceptions\ObjectTreeEqualException.cs" />
+    <Compile Include="Exceptions\ObjectTreeNotEqualException.cs" />
+    <Compile Include="Comparison\ObjectTreeEqualityComparer.cs" />
+    <Compile Include="Comparison\ObjectTreeNodeDifference.cs" />
+    <Compile Include="Comparison\ObjectTreeValueEqualityComparer.cs" />
+    <Compile Include="Comparison\ObjectTreeValueFormatter.cs" />
     <Compile Include="ObjectTreeEdge.cs" />
     <Compile Include="ObjectTreeNode.cs" />
     <Compile Include="ObjectTreeEdgePath.cs" />

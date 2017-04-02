@@ -122,7 +122,7 @@ namespace LatticeObjectTree
         /// <param name="edgeFromParent">the edge from the parent node to this node</param>
         /// <exception cref="ArgumentNullException">if <c>originalNode</c>, <c>parentNode</c>, or <c>edgeFromParent</c> is null</exception>
         public DuplicateObjectTreeNode(ObjectTreeNode originalNode, ObjectTreeNode parentNode, ObjectTreeEdge edgeFromParent)
-             : base(originalNode != null ? originalNode.Value : null, originalNode != null ? originalNode.NodeType : ObjectTreeNodeType.Unknown, parentNode, edgeFromParent, new EmptyObjectTreeSpawnStrategy())
+             : base(originalNode?.Value, originalNode?.NodeType ?? ObjectTreeNodeType.Unknown, parentNode, edgeFromParent, new EmptyObjectTreeSpawnStrategy())
         {
             if (originalNode == null) throw new ArgumentNullException(nameof(originalNode));
             if (parentNode == null) throw new ArgumentNullException(nameof(parentNode));
