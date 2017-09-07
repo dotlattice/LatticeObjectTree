@@ -244,7 +244,7 @@ namespace LatticeObjectTree
             valueType = Nullable.GetUnderlyingType(valueType) ?? valueType;
 
             ObjectTreeNodeType nodeType;
-            if (valueType.IsValueType || valueType == typeof(string) || valueType == typeof(byte[]))
+            if (IsPrimitiveType(valueType))
             {
                 nodeType = ObjectTreeNodeType.Primitive;
             }
@@ -263,9 +263,22 @@ namespace LatticeObjectTree
             return nodeType;
         }
 
+        private static bool IsPrimitiveType(Type valueType)
+        {
+            bool isPrimitive = valueType.IsPrimitive
+                || valueType == typeof(string)
+                || valueType == typeof(Guid)
+                || valueType == typeof(DateTime)
+                || valueType == typeof(DateTimeOffset)
+                || valueType == typeof(TimeSpan)
+                || valueType == typeof(byte[])
+                || valueType.IsEnum;
+            return isPrimitive;
+        }
+
         private static bool IsIgnoredSystemType(Type valueType)
         {
-            if (valueType.Name.Contains("AnonymousType"))
+            if (valueType.Name.Contains("AnonymousType") || valueType == typeof(string))
             {
                 return false;
             }
@@ -275,15 +288,9 @@ namespace LatticeObjectTree
                 return true;
             }
 
-            if (valueType.Namespace.StartsWith("System."))
-            {
-                return true;
-            }
-
-            return valueType.Namespace == "System" 
-                && !valueType.IsValueType 
-                && !valueType.IsArray 
-                && valueType.FullName != typeof(string).FullName;
+            return (valueType.Namespace == "System" || valueType.Namespace == "System.Reflection")
+                && !valueType.IsValueType
+                && !valueType.IsArray;
         }
 
         /// <inheritdoc />

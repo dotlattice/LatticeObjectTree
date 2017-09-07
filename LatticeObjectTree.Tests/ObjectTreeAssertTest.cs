@@ -446,6 +446,31 @@ namespace LatticeObjectTree
         }
 
         [Test]
+        public void ListTestObjects_Samples_EqualButDifferentListTypes()
+        {
+            var obj1 = new ListTestObject<string>()
+            {
+                Enumerable = new[] { "test" },
+                ReadOnlyCollection = new[] { "test2", "test22" },
+                Collection = new[] { "test3" },
+                Array = new[] { "test4" },
+                IList = new[] { "test5" },
+                List = new List<string> { "test6" },
+            };
+            var obj2 = new ListTestObject<string>()
+            {
+                Enumerable = new List<string> { "test" },
+                ReadOnlyCollection = new List<string> { "test2", "test22" },
+                Collection = new List<string> { "test3" },
+                Array = new [] { "test4" },
+                IList = new List<string> { "test5" },
+                List = new List<string> { "test6" },
+            };
+
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
         public void ListTestObjects_Samples_NotEqual()
         {
             var obj1 = new ListTestObject<string>()
@@ -486,6 +511,76 @@ namespace LatticeObjectTree
             var obj2 = new ListTestObject<Employee>();
 
             AssertAreNotEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void DictionaryTestObjects_EmptyWithSameType()
+        {
+            var obj1 = new DictionaryTestObject<int, Person>();
+            var obj2 = new DictionaryTestObject<int, Person>();
+
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void DictionaryTestObjects_EmptyDictionariesWithSameType()
+        {
+            var obj1 = new DictionaryTestObject<int, Person>
+            {
+                Dictionary = new Dictionary<int, Person>(),
+                DictionaryOfEnumerables = new Dictionary<int, IEnumerable<Person>>(),
+                DictionaryOfCollections = new Dictionary<int, IReadOnlyCollection<Person>>(),
+            };
+            var obj2 = new DictionaryTestObject<int, Person>()
+            {
+                Dictionary = new Dictionary<int, Person>(),
+                DictionaryOfEnumerables = new Dictionary<int, IEnumerable<Person>>(),
+                DictionaryOfCollections = new Dictionary<int, IReadOnlyCollection<Person>>(),
+            };
+
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void DictionaryTestObjects_EmptySameValuesButDifferentListTypes()
+        {
+            var person = new Person { FullName = "Robert Paulson" };
+            var obj1 = new DictionaryTestObject<int, Person>
+            {
+                Dictionary = new Dictionary<int, Person>() { [1] = person },
+                DictionaryOfEnumerables = new Dictionary<int, IEnumerable<Person>>() { [1] = new Person[] { person } },
+                DictionaryOfCollections = new Dictionary<int, IReadOnlyCollection<Person>>() { [1] = new Person[] { person } },
+            };
+            var obj2 = new DictionaryTestObject<int, Person>()
+            {
+                Dictionary = new Dictionary<int, Person>() { [1] = person },
+                DictionaryOfEnumerables = new Dictionary<int, IEnumerable<Person>>() { [1] = new List<Person> { person } },
+                DictionaryOfCollections = new Dictionary<int, IReadOnlyCollection<Person>>() { [1] = new List<Person> { person } },
+            };
+
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void DictionaryTestObjects_EmptyEqualValuesButDifferentListTypes()
+        {
+            var person1 = new Person { FullName = "Robert Paulson" };
+            var person2 = new Person { FullName = "Robert Paulson" };
+
+            var obj1 = new DictionaryTestObject<int, Person>
+            {
+                Dictionary = new Dictionary<int, Person>() { [1] = person1 },
+                DictionaryOfEnumerables = new Dictionary<int, IEnumerable<Person>>() { [1] = new Person[] { person1 } },
+                DictionaryOfCollections = new Dictionary<int, IReadOnlyCollection<Person>>() { [1] = new Person[] { person1 } },
+            };
+            var obj2 = new DictionaryTestObject<int, Person>()
+            {
+                Dictionary = new Dictionary<int, Person>() { [1] = person2 },
+                DictionaryOfEnumerables = new Dictionary<int, IEnumerable<Person>>() { [1] = new List<Person> { person2 } },
+                DictionaryOfCollections = new Dictionary<int, IReadOnlyCollection<Person>>() { [1] = new List<Person> { person2 } },
+            };
+
+            AssertAreEqual(obj1, obj2);
         }
 
         [Test]
@@ -709,6 +804,13 @@ namespace LatticeObjectTree
             public T[] Array { get; set; } = new T[0];
             public IList<T> IList { get; set; } = new T[0];
             public List<T> List { get; set; } = new List<T>();
+        }
+
+        private class DictionaryTestObject<TKey, TValue>
+        {
+            public IReadOnlyDictionary<TKey, TValue> Dictionary { get; set; }
+            public IReadOnlyDictionary<TKey, IEnumerable<TValue>> DictionaryOfEnumerables { get; set; }
+            public IReadOnlyDictionary<TKey, IReadOnlyCollection<TValue>> DictionaryOfCollections { get; set; }
         }
 
         private class ReflectionPropertiesObject

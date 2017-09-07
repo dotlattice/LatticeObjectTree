@@ -66,7 +66,7 @@ namespace LatticeObjectTree.Comparison
         public string ActualDisplayValue { get; }
 
         /// <summary>
-        /// The format that can generate the <see cref="Message"/> using <see cref="ExpectedDisplayValue"/> and <see cref=ActualDisplayValue""/>.
+        /// The format that can generate the <see cref="Message"/> using <see cref="ExpectedDisplayValue"/> and <see cref="ActualDisplayValue"/>.
         /// </summary>
         private string MessageFormat { get; }
 

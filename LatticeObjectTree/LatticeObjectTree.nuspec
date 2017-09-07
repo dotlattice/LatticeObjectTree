@@ -9,5 +9,6 @@
     <licenseUrl>https://github.com/dotlattice/LatticeObjectTree/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A .NET library for working with a tree of objects.</description>
+    <tags>object tree assert objecttree objecttreeassert equality comparer comparison</tags>
   </metadata>
 </package>
