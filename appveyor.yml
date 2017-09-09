@@ -1,15 +1,17 @@
-version: 1.0.1.{build}
+version: 1.1.0.{build}
+image: Visual Studio 2017
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+
 configuration: Release
 platform: Any CPU
-assembly_info:
-  patch: true
-  file: '**\AssemblyInfo.*'
-  assembly_version: '{version}'
 before_build:
 - cmd: nuget restore
 build:
-  publish_nuget: true
   verbosity: minimal
 artifacts:
-- path: LatticeObjectTree\bin\Release\LatticeObjectTree.dll
-- path: LatticeObjectTree\bin\Release\LatticeObjectTree.XML
+- path: LatticeObjectTree\bin\Release\*.nupkg
+- path: LatticeObjectTree\bin\Release\net35\*.*

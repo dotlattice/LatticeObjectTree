@@ -1,5 +1,7 @@
 ﻿using LatticeObjectTree.Comparison;
 using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
+using TestCaseAttribute = Xunit.InlineDataAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +12,7 @@ namespace LatticeObjectTree.Comparison
 {
     public class ObjectTreeEqualityComparerTest
     {
-        private ObjectTreeEqualityComparer objectComparer;
-
-        [SetUp]
-        public void SetUp()
-        {
-            objectComparer = new ObjectTreeEqualityComparer();
-        }
-
+        [Xunit.Theory]
         [TestCase(2, 2, 0)]
         [TestCase(1, 2, 1)]
         [TestCase(2.0f, 2.0f, 0)]
@@ -26,7 +21,7 @@ namespace LatticeObjectTree.Comparison
         [TestCase("hello", "world", 1)]
         public void FindDifferences_SimpleValue(object a, object b, int expectedDifferenceCount)
         {
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(expectedDifferenceCount, differences.Count);
         }
 
@@ -35,7 +30,7 @@ namespace LatticeObjectTree.Comparison
         {
             var a = new object();
             var b = new object();
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(1, differences.Count);
 
             var difference = differences.Single();
@@ -51,19 +46,19 @@ namespace LatticeObjectTree.Comparison
                 Id = 1,
                 Name = "Test",
                 BinaryData = new byte[] { 1, 2, 3 },
-                ChildArray = new[] 
-                { 
+                ChildArray = new[]
+                {
                     new SampleChildObject1 { Hi = 1, },
                     new SampleChildObject1 { Hi = 2, },
                 },
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 3, },
                     new SampleChildObject1 { Hi = 4, },
                 }
             };
 
-            var differences = objectComparer.FindDifferences(a, a).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, a).ToList();
             Assert.AreEqual(0, differences.Count);
         }
 
@@ -75,13 +70,13 @@ namespace LatticeObjectTree.Comparison
                 Id = 1,
                 Name = "Test",
                 BinaryData = new byte[] { 1, 2, 3 },
-                ChildArray = new[] 
-                { 
+                ChildArray = new[]
+                {
                     new SampleChildObject1 { Hi = 1, },
                     new SampleChildObject1 { Hi = 2, },
                 },
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 3, },
                     new SampleChildObject1 { Hi = 4, },
                 }
@@ -91,18 +86,18 @@ namespace LatticeObjectTree.Comparison
                 Id = 1,
                 Name = "Test",
                 BinaryData = new byte[] { 1, 2, 3 },
-                ChildArray = new[] 
-                { 
+                ChildArray = new[]
+                {
                     new SampleChildObject1 { Hi = 1, },
                     new SampleChildObject1 { Hi = 2, },
                 },
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 3, },
                     new SampleChildObject1 { Hi = 4, },
                 }
             };
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(0, differences.Count);
         }
 
@@ -113,13 +108,13 @@ namespace LatticeObjectTree.Comparison
             {
                 Id = 1,
                 Name = "Test",
-                ChildArray = new[] 
-                { 
+                ChildArray = new[]
+                {
                     new SampleChildObject1 { Hi = 1, },
                     new SampleChildObject1 { Hi = 2, },
                 },
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 3, },
                     new SampleChildObject1 { Hi = 4, },
                 }
@@ -128,18 +123,18 @@ namespace LatticeObjectTree.Comparison
             {
                 Id = 1,
                 Name = "Test2",
-                ChildArray = new[] 
-                { 
+                ChildArray = new[]
+                {
                     new SampleChildObject1 { Hi = 1, },
                     new SampleChildObject1 { Hi = 2, },
                 },
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 22, },
                     new SampleChildObject1 { Hi = 4, },
                 }
             };
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(2, differences.Count);
 
             {
@@ -161,7 +156,7 @@ namespace LatticeObjectTree.Comparison
             {
                 Id = 1,
                 Name = "Test",
-                BinaryData = new byte[] { 1, 2, 3}
+                BinaryData = new byte[] { 1, 2, 3 }
             };
             var b = new SampleObject1
             {
@@ -169,7 +164,7 @@ namespace LatticeObjectTree.Comparison
                 Name = "Test",
                 BinaryData = new byte[] { 1, 2, 2 }
             };
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(1, differences.Count);
 
             var diff = differences.Single();
@@ -194,7 +189,7 @@ namespace LatticeObjectTree.Comparison
                 ChildArray = new SampleChildObject1[0],
                 ChildCollection = new SampleChildObject1[0],
             };
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(0, differences.Count);
         }
 
@@ -205,13 +200,13 @@ namespace LatticeObjectTree.Comparison
             {
                 Id = 1,
                 Name = "Test",
-                ChildArray = new[] 
-                { 
+                ChildArray = new[]
+                {
                     new SampleChildObject1 { Hi = 1, },
                     new SampleChildObject1 { Hi = 2, },
                 },
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 3, },
                     new SampleChildObject1 { Hi = 4, },
                 }
@@ -220,14 +215,14 @@ namespace LatticeObjectTree.Comparison
             {
                 Id = 1,
                 Name = "Test",
-                ChildCollection = new[] 
-                { 
+                ChildCollection = new[]
+                {
                     new SampleChildObject1 { Hi = 3, },
                     new SampleChildObject1 { Hi = 4, },
                     new SampleChildObject1 { Hi = 5, },
                 }
             };
-            var differences = objectComparer.FindDifferences(a, b).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(a, b).ToList();
             Assert.AreEqual(4, differences.Count);
 
             {
@@ -250,7 +245,7 @@ namespace LatticeObjectTree.Comparison
             var obj2 = new SampleObject4();
             obj2.Child = obj1;
 
-            var differences = objectComparer.FindDifferences(obj1, obj2).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(obj1, obj2).ToList();
             Assert.AreEqual(1, differences.Count);
         }
 
@@ -260,7 +255,7 @@ namespace LatticeObjectTree.Comparison
             var obj1 = new SampleObject4();
             obj1.Child = obj1;
 
-            var differences = objectComparer.FindDifferences(obj1, obj1).ToList();
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(obj1, obj1).ToList();
             Assert.AreEqual(0, differences.Count);
         }
 

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;

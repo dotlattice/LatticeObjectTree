@@ -68,14 +68,14 @@ namespace LatticeObjectTree.Comparison
                     valueString = valueString.ToLower();
                     isQuotingNecessary = false;
                 }
-                else if (valueType.IsEnum)
+                else if (TypeUtils.IsEnum(valueType))
                 {
                     valueString = valueType.Name + "." + valueString;
                     isQuotingNecessary = false;
                 }
                 else
                 {
-                    isQuotingNecessary = !IsNumeric(valueType);
+                    isQuotingNecessary = !TypeUtils.IsNumeric(valueType);
                 }
             }
 
@@ -83,7 +83,7 @@ namespace LatticeObjectTree.Comparison
             {
                 // If the string contains any "special" characters, then we'll use the verbatim string literal syntax.
                 char[] specialCharacters = new[] { '\'', '"', '\n', '\r', '\t', '\0', '\a', '\b', '\f', '\v' };
-                if (valueString.Any(specialCharacters.Contains))
+                if (valueString.IndexOfAny(specialCharacters) >= 0)
                 {
                     valueString = "@\"" + valueString.Replace("\"", "\"\"") + "\"";
                 }
@@ -94,31 +94,6 @@ namespace LatticeObjectTree.Comparison
             }
 
             return valueString;
-        }
-
-
-        private static bool IsNumeric(Type type)
-        {
-            if (type == null) return false;
-            type = Nullable.GetUnderlyingType(type) ?? type;
-            var typeCode = Type.GetTypeCode(type);
-            switch (typeCode)
-            {
-                case TypeCode.Decimal:
-                case TypeCode.Single:
-                case TypeCode.Double:
-                case TypeCode.Byte:
-                case TypeCode.SByte:
-                case TypeCode.UInt16:
-                case TypeCode.Int16:
-                case TypeCode.UInt32:
-                case TypeCode.Int32:
-                case TypeCode.UInt64:
-                case TypeCode.Int64:
-                    return true;
-                default:
-                    return false;
-            }
         }
     }
 }

@@ -248,7 +248,7 @@ namespace LatticeObjectTree
             {
                 nodeType = ObjectTreeNodeType.Primitive;
             }
-            else if (typeof(System.Collections.IEnumerable).IsAssignableFrom(valueType))
+            else if (TypeUtils.IsAssignableFrom(typeof(System.Collections.IEnumerable), valueType))
             {
                 nodeType = ObjectTreeNodeType.Collection;
             }
@@ -265,14 +265,14 @@ namespace LatticeObjectTree
 
         private static bool IsPrimitiveType(Type valueType)
         {
-            bool isPrimitive = valueType.IsPrimitive
+            bool isPrimitive = TypeUtils.IsPrimitive(valueType)
                 || valueType == typeof(string)
                 || valueType == typeof(Guid)
                 || valueType == typeof(DateTime)
                 || valueType == typeof(DateTimeOffset)
                 || valueType == typeof(TimeSpan)
                 || valueType == typeof(byte[])
-                || valueType.IsEnum;
+                || TypeUtils.IsEnum(valueType);
             return isPrimitive;
         }
 
@@ -289,7 +289,7 @@ namespace LatticeObjectTree
             }
 
             return (valueType.Namespace == "System" || valueType.Namespace == "System.Reflection")
-                && !valueType.IsValueType
+                && !TypeUtils.IsValueType(valueType)
                 && !valueType.IsArray;
         }
 
@@ -319,7 +319,7 @@ namespace LatticeObjectTree
             {
                 childNodeEnumerable = CreateObjectChildNodes(value, node, childSpawnStrategyOverride);
             }
-            else if (node.NodeType == ObjectTreeNodeType.Collection && typeof(System.Collections.IEnumerable).IsAssignableFrom(valueType))
+            else if (node.NodeType == ObjectTreeNodeType.Collection && TypeUtils.IsAssignableFrom(typeof(System.Collections.IEnumerable), valueType))
             {
                 var enumerable = (System.Collections.IEnumerable)value;
                 childNodeEnumerable = CreateEnumerableChildNodes(enumerable, node, childSpawnStrategyOverride);
@@ -351,7 +351,7 @@ namespace LatticeObjectTree
 
             var parentValueType = value.GetType();
             var propertyChildNodes = (
-                from property in parentValueType.GetProperties()
+                from property in TypeUtils.GetProperties(parentValueType)
                 where property.CanRead && !property.GetIndexParameters().Any()
                 let childValue = GetPropertyValue(property, value)
                 let edgeFromParent = new ObjectTreeEdge(property)
@@ -359,7 +359,7 @@ namespace LatticeObjectTree
                 select new ObjectTreeNode(childValue, nodeType, parentNode, edgeFromParent, spawnStrategy: childSpawnStrategy)
             );
             var fieldChildNodes = (
-                from field in parentValueType.GetFields()
+                from field in TypeUtils.GetFields(parentValueType)
                 let childValue = GetFieldValue(field, value)
                 let edgeFromParent = new ObjectTreeEdge(field)
                 let nodeType = DetermineNodeType(childValue, parentNode, edgeFromParent)

@@ -128,7 +128,7 @@ namespace LatticeObjectTree
                         return false;
                     }
                 }
-                catch (TargetException)
+                catch (Exception)
                 {
                     return false;
                 }
@@ -255,7 +255,7 @@ namespace LatticeObjectTree
 
                 if (x.Name != y.Name) return false;
                 if (x.DeclaringType != y.DeclaringType) return false;
-                if (x.MetadataToken != y.MetadataToken) return false;
+                //if (x.MetadataToken != y.MetadataToken) return false;
                 if (x.Module != y.Module) return false;
 
                 return true;
@@ -270,7 +270,7 @@ namespace LatticeObjectTree
                 {
                     hashCode = 31 * hashCode + (obj.Name?.GetHashCode() ?? 0);
                     hashCode = 31 * hashCode + (obj.DeclaringType?.GetHashCode() ?? 0);
-                    hashCode = 31 * hashCode + obj.MetadataToken.GetHashCode();
+                    //hashCode = 31 * hashCode + obj.MetadataToken.GetHashCode();
                     hashCode = 31 * hashCode + (obj.Module?.GetHashCode() ?? 0);
                 }
                 return hashCode;

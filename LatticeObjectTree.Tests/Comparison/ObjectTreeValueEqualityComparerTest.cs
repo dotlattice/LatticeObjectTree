@@ -1,5 +1,7 @@
 ﻿using LatticeObjectTree.Comparison;
 using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
+using TestCaseAttribute = Xunit.InlineDataAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +12,7 @@ namespace LatticeObjectTree.Comparison
 {
     public class ObjectTreeValueEqualityComparerTest
     {
-        private IEqualityComparer<object> objectComparer;
-
-        [SetUp]
-        public void SetUp()
-        {
-            objectComparer = ObjectTreeValueEqualityComparer.Instance;
-        }
-
+        [Xunit.Theory]
         [TestCase(2, 2, true)]
         [TestCase(2, 1, false)]
         [TestCase(2, 2f, false)]
@@ -30,15 +25,15 @@ namespace LatticeObjectTree.Comparison
         [TestCase(null, null, true)]
         public void AreValuesEqual_SimpleValues(object a, object b, bool expected)
         {
-            var actual = objectComparer.Equals(a, b);
+            var actual = ObjectTreeValueEqualityComparer.Instance.Equals(a, b);
             Assert.AreEqual(expected, actual);
 
-            var actualReversed = objectComparer.Equals(b, a);
+            var actualReversed = ObjectTreeValueEqualityComparer.Instance.Equals(b, a);
             Assert.AreEqual(expected, actualReversed);
 
             if (expected)
             {
-                Assert.AreEqual(objectComparer.GetHashCode(a), objectComparer.GetHashCode(b));
+                Assert.AreEqual(ObjectTreeValueEqualityComparer.Instance.GetHashCode(a), ObjectTreeValueEqualityComparer.Instance.GetHashCode(b));
             }
         }
 
@@ -46,7 +41,7 @@ namespace LatticeObjectTree.Comparison
         public void AreValuesEqual_ByteArray_Self()
         {
             var a = new byte[] { 1, 171, 128, 3 };
-            var actual = objectComparer.Equals(a, a);
+            var actual = ObjectTreeValueEqualityComparer.Instance.Equals(a, a);
             Assert.AreEqual(true, actual);
         }
 
@@ -55,9 +50,9 @@ namespace LatticeObjectTree.Comparison
         {
             var a = new byte[] { 1, 171, 128, 3 };
             var b = new byte[] { 1, 171, 128, 3 };
-            var actual = objectComparer.Equals(a, b);
+            var actual = ObjectTreeValueEqualityComparer.Instance.Equals(a, b);
             Assert.AreEqual(true, actual);
-            Assert.AreEqual(objectComparer.GetHashCode(a), objectComparer.GetHashCode(b));
+            Assert.AreEqual(ObjectTreeValueEqualityComparer.Instance.GetHashCode(a), ObjectTreeValueEqualityComparer.Instance.GetHashCode(b));
         }
 
         [Test]
@@ -65,7 +60,7 @@ namespace LatticeObjectTree.Comparison
         {
             var a = new byte[] { 1, 171, 128, 3 };
             var b = new byte[] { 1, 171, 128, 2 };
-            var actual = objectComparer.Equals(a, b);
+            var actual = ObjectTreeValueEqualityComparer.Instance.Equals(a, b);
             Assert.AreEqual(false, actual);
         }
 
@@ -75,9 +70,9 @@ namespace LatticeObjectTree.Comparison
             var a = 0f;
             var b = float.Epsilon / 2;
 
-            var actual = objectComparer.Equals(a, b);
+            var actual = ObjectTreeValueEqualityComparer.Instance.Equals(a, b);
             Assert.AreEqual(true, actual);
-            Assert.AreEqual(objectComparer.GetHashCode(a), objectComparer.GetHashCode(b));
+            Assert.AreEqual(ObjectTreeValueEqualityComparer.Instance.GetHashCode(a), ObjectTreeValueEqualityComparer.Instance.GetHashCode(b));
         }
 
         [Test]
@@ -86,9 +81,9 @@ namespace LatticeObjectTree.Comparison
             var a = 0d;
             var b = double.Epsilon / 2;
 
-            var actual = objectComparer.Equals(a, b);
+            var actual = ObjectTreeValueEqualityComparer.Instance.Equals(a, b);
             Assert.AreEqual(true, actual);
-            Assert.AreEqual(objectComparer.GetHashCode(a), objectComparer.GetHashCode(b));
+            Assert.AreEqual(ObjectTreeValueEqualityComparer.Instance.GetHashCode(a), ObjectTreeValueEqualityComparer.Instance.GetHashCode(b));
         }
     }
 }

@@ -17,7 +17,7 @@ namespace LatticeObjectTree
         public ObjectTreeEdgePath(IEnumerable<ObjectTreeEdge> edges)
         {
             if (edges == null) throw new ArgumentNullException(nameof(edges));
-            Edges = edges.Where(e => e != null).ToList().AsReadOnly();
+            Edges = CollectionUtils.AsReadOnly(edges.Where(e => e != null).ToList());
         }
 
         /// <summary>

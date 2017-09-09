@@ -1,9 +1,12 @@
 ﻿using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace LatticeObjectTree
 {
@@ -357,8 +360,8 @@ namespace LatticeObjectTree
             {
                 Type = typeof(string),
                 TypeToStringFunc = (Type t) => t.FullName,
-                Field = typeof(string).GetField("Empty", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public),
-                Property = typeof(string).GetProperty("Length"),
+                Field = typeof(string).GetRuntimeField("Empty"),
+                Property = typeof(string).GetRuntimeProperty("Length"),
             };
 
             var objectTree = new ObjectTree(obj);

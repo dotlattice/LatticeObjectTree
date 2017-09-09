@@ -1,5 +1,6 @@
 ﻿using LatticeObjectTree.Exceptions;
 using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -278,7 +279,7 @@ namespace LatticeObjectTree
             AssertAreNotEqual(a, b);
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedProperties = new[] { typeof(Address).GetProperty(nameof(Address.Lines)) },
+                ExcludedProperties = new[] { typeof(Address).GetRuntimeProperty(nameof(Address.Lines)) },
             });
 
             var assertionException = Assert.Throws<ObjectTreeEqualException>(() => ObjectTreeAssert.AreEqual(a, b));
@@ -307,15 +308,15 @@ namespace LatticeObjectTree
             // Try a bunch of different ways to filter out the difference so that they are equal.
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedProperties = new[] { typeof(Company).GetProperty(nameof(Company.Employees)) }
+                ExcludedProperties = new[] { typeof(Company).GetRuntimeProperty(nameof(Company.Employees)) }
             });
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedProperties = new[] { typeof(Employee).GetProperty(nameof(Employee.FullName)) }
+                ExcludedProperties = new[] { typeof(Employee).GetRuntimeProperty(nameof(Employee.FullName)) }
             });
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
-                ExcludedProperties = new[] { typeof(Person).GetProperty(nameof(Person.FullName)) }
+                ExcludedProperties = new[] { typeof(Person).GetRuntimeProperty(nameof(Person.FullName)) }
             });
             AssertAreEqual(a, b, new ObjectTreeNodeFilter
             {
@@ -589,12 +590,12 @@ namespace LatticeObjectTree
             var obj1 = new ReflectionPropertiesObject()
             {
                 Type = typeof(string),
-                PropertyInfo = typeof(string).GetProperty(nameof(string.Length)),
+                PropertyInfo = typeof(string).GetRuntimeProperty(nameof(string.Length)),
             };
             var obj2 = new ReflectionPropertiesObject()
             {
                 Type = typeof(ReflectionPropertiesObject),
-                PropertyInfo = typeof(ReflectionPropertiesObject).GetProperty(nameof(ReflectionPropertiesObject.PropertyInfo)),
+                PropertyInfo = typeof(ReflectionPropertiesObject).GetRuntimeProperty(nameof(ReflectionPropertiesObject.PropertyInfo)),
             };
             AssertAreNotEqual(obj1, obj2);
         }

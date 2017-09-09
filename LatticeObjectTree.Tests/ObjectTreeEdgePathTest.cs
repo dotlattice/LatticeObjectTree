@@ -1,7 +1,9 @@
 ﻿using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -67,14 +69,14 @@ namespace LatticeObjectTree
         [Test]
         public void ToString_PropertyNodeOnly()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
             Assert.AreEqual("<root>.Length", path.ToString());
         }
 
         [Test]
         public void ToString_RootToPropertyNode()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
             Assert.AreEqual("<root>.Length", path.ToString());
         }
 
@@ -95,7 +97,7 @@ namespace LatticeObjectTree
         [Test]
         public void ToString_RootToPropertyNodeToIndexNode()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetProperty("Length")), new ObjectTreeEdge(2) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")), new ObjectTreeEdge(2) });
             Assert.AreEqual("<root>.Length[2]", path.ToString());
         }
 
@@ -144,7 +146,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_StringLengthProperty()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
             var str = "test";
 
             object result;
@@ -157,7 +159,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_RootToStringLengthProperty()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
             var str = "test";
 
             object result;
@@ -170,7 +172,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_RootToStringLengthProperty_NullString()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
 
             object result;
             bool isResolved = path.TryResolve(null, out result);
@@ -234,7 +236,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_RootToListIndexToStringLengthProperty()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(index: 1), new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(index: 1), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
             var list = new[] { "hello", "world" };
 
             object result;
@@ -247,7 +249,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_RootToListIndexToStringLengthProperty_NullList()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(index: 1), new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(index: 1), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
 
             object result;
             bool isResolved = path.TryResolve(null, out result);
@@ -259,7 +261,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_RootToListIndexToStringLengthProperty_NullString()
         {
-            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(index: 1), new ObjectTreeEdge(typeof(string).GetProperty("Length")) });
+            var path = new ObjectTreeEdgePath(new[] { new ObjectTreeEdge(), new ObjectTreeEdge(index: 1), new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length")) });
             var list = new[] { "hello", null };
 
             object result;

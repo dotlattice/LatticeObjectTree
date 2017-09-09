@@ -24,7 +24,7 @@ namespace LatticeObjectTree.Exceptions
             if (differences == null) throw new ArgumentNullException(nameof(differences));
             if (!differences.Any()) throw new ArgumentException("Must have at least one difference if the expected and actual objects are not equal");
 
-            Differences = differences.Take(100).ToList().AsReadOnly();
+            Differences = CollectionUtils.AsReadOnly(differences.Take(100).ToList());
         }
 
         /// <summary>

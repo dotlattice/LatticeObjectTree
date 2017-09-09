@@ -13,9 +13,17 @@ namespace LatticeObjectTree.Comparison
         private readonly IEqualityComparer<object> valueEqualityComparer;
         private readonly ICustomFormatter valueFormatter;
 
+#pragma warning disable CS0618 
+        /// <summary>
+        /// A default equality comparer instance.
+        /// </summary>
+        public static ObjectTreeEqualityComparer Instance { get; } = new ObjectTreeEqualityComparer();
+#pragma warning restore CS0618
+
         /// <summary>
         /// Constructs a default equality comparer.
         /// </summary>
+        [Obsolete("Use ObjectTreeEqualityComparer.Instance instead")]
         public ObjectTreeEqualityComparer()
             : this(valueEqualityComparer: null, valueFormatter: null)
         {

@@ -26,22 +26,22 @@ namespace LatticeObjectTree
         /// <summary>
         /// The case-insensitive names of properties to exclude.
         /// </summary>
-        public ICollection<string> ExcludedPropertyNames { get; set; } = new string[0];
+        public ICollection<string> ExcludedPropertyNames { get; set; } = ArrayUtils.Empty<string>();
 
         /// <summary>
         /// Properties to exclude.
         /// </summary>
-        public ICollection<PropertyInfo> ExcludedProperties { get; set; } = new PropertyInfo[0];
+        public ICollection<PropertyInfo> ExcludedProperties { get; set; } = ArrayUtils.Empty<PropertyInfo>();
 
         /// <summary>
         /// Predicates that determine whether a property is excluded.
         /// </summary>
-        public ICollection<Func<PropertyInfo, bool>> ExcludedPropertyPredicates { get; set; } = new Func<PropertyInfo, bool>[0];
+        public ICollection<Func<PropertyInfo, bool>> ExcludedPropertyPredicates { get; set; } = ArrayUtils.Empty<Func<PropertyInfo, bool>>();
 
         /// <summary>
         /// Predicates that determine whether a node is excluded.
         /// </summary>
-        public ICollection<Func<ObjectTreeNode, bool>> ExcludedNodePredicates { get; set; } = new Func<ObjectTreeNode, bool>[0];
+        public ICollection<Func<ObjectTreeNode, bool>> ExcludedNodePredicates { get; set; } = ArrayUtils.Empty<Func<ObjectTreeNode, bool>>();
 
         /// <summary>
         /// Applies the filter to the nodes.

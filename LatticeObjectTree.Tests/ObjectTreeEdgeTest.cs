@@ -1,7 +1,9 @@
 ﻿using NUnit.Framework;
+using TestAttribute = Xunit.FactAttribute;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,7 +48,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_StringLengthProperty()
         {
-            var edge = new ObjectTreeEdge(typeof(string).GetProperty("Length"));
+            var edge = new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length"));
             var str = "test";
 
             object result;
@@ -59,7 +61,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_StringLengthProperty_NullString()
         {
-            var edge = new ObjectTreeEdge(typeof(string).GetProperty("Length"));
+            var edge = new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length"));
 
             object result;
             bool isResolved = edge.TryResolve(null, out result);
@@ -122,7 +124,7 @@ namespace LatticeObjectTree
         [Test]
         public void TryResolve_StringLengthProperty_NonString()
         {
-            var edge = new ObjectTreeEdge(typeof(string).GetProperty("Length"));
+            var edge = new ObjectTreeEdge(typeof(string).GetRuntimeProperty("Length"));
 
             object result;
             bool isResolved = edge.TryResolve(new Object(), out result);
@@ -150,7 +152,7 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_SameProperty()
         {
-            var property = typeof(string).GetProperty("Length");
+            var property = typeof(string).GetRuntimeProperty("Length");
 
             var a = new ObjectTreeEdge(property);
             var b = new ObjectTreeEdge(property);
@@ -160,8 +162,8 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_DifferentProperty_SameName()
         {
-            var propertyA = typeof(string).GetProperty("Length");
-            var propertyB = typeof(int[]).GetProperty("Length");
+            var propertyA = typeof(string).GetRuntimeProperty("Length");
+            var propertyB = typeof(int[]).GetRuntimeProperty("Length");
             var a = new ObjectTreeEdge(propertyA);
             var b = new ObjectTreeEdge(propertyB);
             AssertEquality(a, b, expected: false);
@@ -170,8 +172,8 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_SamePropertyWithDifferentGenericType()
         {
-            var propertyA = typeof(ICollection<int>).GetProperty("Count");
-            var propertyB = typeof(ICollection<short>).GetProperty("Count");
+            var propertyA = typeof(ICollection<int>).GetRuntimeProperty("Count");
+            var propertyB = typeof(ICollection<short>).GetRuntimeProperty("Count");
             var a = new ObjectTreeEdge(propertyA);
             var b = new ObjectTreeEdge(propertyB);
             AssertEquality(a, b, expected: false);
@@ -196,8 +198,8 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_DifferentPropertySameCaseInsensitiveName()
         {
-            var propertyA = typeof(TestClass).GetProperty("Hi");
-            var propertyB = typeof(TestClass).GetProperty("HI");
+            var propertyA = typeof(TestClass).GetRuntimeProperty("Hi");
+            var propertyB = typeof(TestClass).GetRuntimeProperty("HI");
             Assert.AreNotEqual(propertyA, propertyB);
 
             var a = new ObjectTreeEdge(propertyA);
@@ -208,7 +210,7 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_SameField()
         {
-            var field = typeof(TestClass).GetField("world");
+            var field = typeof(TestClass).GetRuntimeField("world");
             var a = new ObjectTreeEdge(field);
             var b = new ObjectTreeEdge(field);
             AssertEquality(a, b, expected: true);
@@ -217,8 +219,8 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_DifferentField()
         {
-            var fieldA = typeof(TestClass).GetField("hello");
-            var fieldB = typeof(TestClass).GetField("world");
+            var fieldA = typeof(TestClass).GetRuntimeField("hello");
+            var fieldB = typeof(TestClass).GetRuntimeField("world");
 
             var a = new ObjectTreeEdge(fieldA);
             var b = new ObjectTreeEdge(fieldB);
@@ -228,8 +230,8 @@ namespace LatticeObjectTree
         [Test]
         public void Equals_PropertyVsField()
         {
-            var property = typeof(TestClass).GetProperty("Hi");
-            var field = typeof(TestClass).GetField("hi");
+            var property = typeof(TestClass).GetRuntimeProperty("Hi");
+            var field = typeof(TestClass).GetRuntimeField("hi");
 
             var a = new ObjectTreeEdge(property);
             var b = new ObjectTreeEdge(field);
@@ -282,7 +284,7 @@ namespace LatticeObjectTree
         [Test]
         public void ToString_PropertyNode()
         {
-            var property = typeof(string).GetProperty("Length");
+            var property = typeof(string).GetRuntimeProperty("Length");
             var node = new ObjectTreeEdge(property);
             Assert.AreEqual(".Length", node.ToString());
         }

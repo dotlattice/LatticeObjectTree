@@ -36,7 +36,7 @@ namespace LatticeObjectTree
         {
             var expectedTree = ObjectTree.Create(expected, nodeFilter);
             var actualTree = ObjectTree.Create(actual, nodeFilter);
-            var differences = new ObjectTreeEqualityComparer().FindDifferences(expectedTree, actualTree);
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(expectedTree, actualTree);
             if (differences.Any())
             {
                 throw new ObjectTreeEqualException(expectedTree, actualTree, differences);
@@ -67,7 +67,7 @@ namespace LatticeObjectTree
         {
             var expectedTree = ObjectTree.Create(expected, nodeFilter);
             var actualTree = ObjectTree.Create(actual, nodeFilter);
-            var differences = new ObjectTreeEqualityComparer().FindDifferences(expectedTree, actualTree);
+            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(expectedTree, actualTree);
             if (!differences.Any())
             {
                 throw new ObjectTreeNotEqualException(expectedTree, actualTree);

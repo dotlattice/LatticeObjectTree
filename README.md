@@ -1,9 +1,9 @@
 # LatticeObjectTree [![Build status](https://ci.appveyor.com/api/projects/status/uptdctnkaitlyslg)](https://ci.appveyor.com/project/dotlattice/latticeobjecttree)
 
-LatticeObjectTree is a .NET library for working with a tree of objects.
+LatticeObjectTree is a .NET library for comparing objects.
 
 ## Quick Start
-The most common way to use this library is as an assertion framework with the `ObjectTreeAssert` class.  Here's an example:
+You can perform a deep comparison of two objects using the `ObjectTreeAssert` class.  Here's an example:
 
 ```c#
 using LatticeObjectTree;
@@ -12,7 +12,7 @@ ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2});
 
 That will throw an exception because the two objects have different values for property "a".
 
-You can also use filtering to ignore parts of the objects.  Here's that same example with a filter to avoid the exception:
+You can also use filtering to ignore some parts of the objects.  Here's that same example with a filter to avoid the exception:
 
 ```c#
 using LatticeObjectTree;
@@ -27,10 +27,10 @@ ObjectTreeAssert.AreEqual(new { a = 1, b = 2 }, new { a = 2, b = 2}, new ObjectT
 There are a few ways to start using this library:
 
 * Install the [NuGet package](https://www.nuget.org/packages/LatticeObjectTree/)
-* Download the assembly from the [latest release](https://github.com/dotlattice/LatticeObjectTree/releases/latest) and install it manually
+* Download the assembly from the [latest release](https://github.com/dotlattice/LatticeObjectTree/releases/latest) and reference it manually
 * Copy the parts you want into your project
 
-This entire library is released into the [public domain](https://github.com/dotlattice/LatticeObjectTree/blob/master/LICENSE).  So you can copy anything from this library into your own project without having to worry about attribution or any of that stuff.
+This entire library uses the [Unlicense](https://github.com/dotlattice/LatticeObjectTree/blob/master/LICENSE).  So you can copy anything from this library into your own project without having to worry about attribution or any of that stuff.
 
 
 ## Object Comparison
@@ -39,7 +39,7 @@ The primary goal of this library is to support recursive object comparisons.
 Here's a basic example of comparing two anonymous objects:
 
 ```c#
-var differences = new ObjectTreeEqualityComparer().FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2});
+var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2});
 ```
 
 That comparison will give you a list of differences.  For this example, writing those differences to the console would give you strings like this:
@@ -67,8 +67,7 @@ new ObjectTreeNodeFilter
 Once you've created a filter, you can pass it into most of the methods for working with object trees as optional parameter.  For example, to use a filter with the `ObjectTreeEqualityComparer` class:
 
 ```c#
-var comparer = new ObjectTreeEqualityComparer();
-var differences = comparer.FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2}, new ObjectTreeNodeFilter
+var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(new { a = 1, b = 2 }, new { a = 2, b = 2}, new ObjectTreeNodeFilter
 {
     ExcludedPropertyNames = new[] { "a" }
 });
@@ -122,7 +121,6 @@ public interface IObjectTreeNodeFilter
 ```
 
 ## Object Tree
-
 While the primary goal of this library is to support comparing objects, you can also use the `ObjectTree` class for other purposes.
 
 Here's a very basic example of creating an `ObjectTree` directly:
@@ -163,7 +161,7 @@ var apolloTree = ObjectTree.Create(apollo);
 
 Here's a visualization of the tree for this person:
 
-```
+```text
          +---------------+                             
          |Person (Apollo)|                             
          +-----+---------+                             
@@ -213,7 +211,7 @@ while (nodeQueue.Any())
 
 This example will write the following output:
 
-```
+```text
 <root> = Person("Apollo")
 <root>.Name = Apollo
 <root>.BestFriend = Person("Robert")
@@ -250,7 +248,7 @@ var apolloTree = ObjectTree.Create(apollo);
 
 With this circular reference, our tree looks like this:
 
-```
+```text
          +---------------+                        
          |Person (Apollo)| <---------------------+
          +-----+---------+                       |
