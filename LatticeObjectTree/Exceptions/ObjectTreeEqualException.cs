@@ -74,7 +74,7 @@ namespace LatticeObjectTree.Exceptions
                 }
                 return '\t' + diffString;
             });
-            var differenceLinesString = string.Join(Environment.NewLine, differenceLineEnumerable);
+            var differenceLinesString = string.Join(Environment.NewLine, differenceLineEnumerable.ToArray());
 
             return $"{$"{nameof(ObjectTreeAssert)}.{nameof(ObjectTreeAssert.AreEqual)}() Failure"}{Environment.NewLine}{differenceTitle}{Environment.NewLine}{differenceLinesString}";
         }

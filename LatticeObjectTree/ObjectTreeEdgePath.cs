@@ -65,7 +65,7 @@ namespace LatticeObjectTree
         /// <returns>the string representation of this path</returns>
         public string ToString(string rootVariableName)
         {
-            return (rootVariableName ?? "<root>") + string.Join(string.Empty, Edges.Select(node => node.ToString()));
+            return (rootVariableName ?? "<root>") + string.Join(string.Empty, Edges.Select(node => node.ToString()).ToArray());
         }
 
         #region Equality
