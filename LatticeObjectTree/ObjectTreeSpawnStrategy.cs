@@ -361,7 +361,6 @@ namespace LatticeObjectTree
             );
             var fieldChildNodes = (
                 from field in TypeUtils.GetFields(parentValueType)
-                where !MemberInfoUtils.IsConstantField(field)
                 let childValue = GetFieldValue(field, value)
                 let edgeFromParent = new ObjectTreeEdge(field)
                 let nodeType = DetermineNodeType(childValue, parentNode, edgeFromParent)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace LatticeObjectTree
@@ -35,20 +36,29 @@ namespace LatticeObjectTree
 
         public static IEnumerable<PropertyInfo> GetProperties(Type type)
         {
+            IEnumerable<PropertyInfo> properties;
 #if FEATURE_RUNTIME_MEMBERS
-            return type.GetRuntimeProperties();
+            properties = type.GetRuntimeProperties()
+                .Where(p => p.GetMethod?.IsStatic != true && p.SetMethod?.IsStatic != true);
 #else
-            return type.GetProperties();
+            properties = type.GetProperties()
+                .Where(p => p.GetAccessors().Any(a => !a.IsStatic));
 #endif
+            return properties
+                .Where(p => p.CanRead || p.CanWrite);
         }
 
         public static IEnumerable<FieldInfo> GetFields(Type type)
         {
+            IEnumerable<FieldInfo> fields;
 #if FEATURE_RUNTIME_MEMBERS
-            return type.GetRuntimeFields();
+            fields = type.GetRuntimeFields();
 #else
-            return type.GetFields();
+            fields = type.GetFields();
 #endif
+            return fields.Where(f => f.IsPublic)
+                .Where(f => !f.IsStatic)
+                .Where(f => !f.IsLiteral || f.IsInitOnly);
         }
 
         public static bool IsAssignableFrom(Type currentType, Type type)
