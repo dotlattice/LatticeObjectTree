@@ -21,13 +21,20 @@ namespace LatticeObjectTree.Comparison
 #pragma warning restore CS0618
 
         /// <summary>
+        /// Creates a comparer for the specified options, or returns <see cref="Instance"/> if the options are null.
+        /// </summary>
+        public static ObjectTreeEqualityComparer Create(IObjectTreeCompareOptions options)
+        {
+            if (options == null) return Instance;
+            return new ObjectTreeEqualityComparer(options);
+        }
+
+        /// <summary>
         /// Constructs a default equality comparer.
         /// </summary>
         [Obsolete("Use ObjectTreeEqualityComparer.Instance instead")]
         public ObjectTreeEqualityComparer()
-            : this(valueEqualityComparer: null, valueFormatter: null)
-        {
-        }
+            : this(options: null) { }
 
         /// <summary>
         /// Constructs an equality comparer using the specified value comparer and formatter.
@@ -35,13 +42,28 @@ namespace LatticeObjectTree.Comparison
         /// <param name="valueEqualityComparer">the equality comparer for values within the tree, or null to use a default comparer</param>
         /// <param name="valueFormatter">the formatter for values within the tree, or null to use a default formatter</param>
         /// <exception cref="ArgumentException">if the <paramref name="valueEqualityComparer"/> is another <see cref="ObjectTreeEqualityComparer"/></exception>
+        [Obsolete("Use the constructor with" + nameof(IObjectTreeCompareOptions) + " instead")]
         public ObjectTreeEqualityComparer(IEqualityComparer<object> valueEqualityComparer, ICustomFormatter valueFormatter)
-        {
-            if (valueEqualityComparer is ObjectTreeEqualityComparer) throw new ArgumentException($"Cannot use an {nameof(ObjectTreeEqualityComparer)} as a value equality comparer");
+            : this(new ObjectTreeCompareOptions { ValueEqualityComparer = valueEqualityComparer, ValueFormatter = valueFormatter  })
+        { }
 
-            this.valueEqualityComparer = valueEqualityComparer ?? ObjectTreeValueEqualityComparer.Instance;
-            this.valueFormatter = valueFormatter ?? ObjectTreeValueFormatter.Instance;
+        /// <summary>
+        /// Constructs an equality comparer using the specified value comparer and formatter.
+        /// </summary>
+        /// <param name="options">(optional) options that control the comparison</param>
+        public ObjectTreeEqualityComparer(IObjectTreeCompareOptions options)
+        {
+            if (options?.ValueEqualityComparer is ObjectTreeEqualityComparer) throw new ArgumentException($"Cannot use an {nameof(ObjectTreeEqualityComparer)} as a value equality comparer");
+
+            this.Options = options;
+            this.valueEqualityComparer = options?.ValueEqualityComparer ?? ObjectTreeValueEqualityComparer.Create(options);
+            this.valueFormatter = options?.ValueFormatter ?? ObjectTreeValueFormatter.Instance;
         }
+
+        /// <summary>
+        /// The options for this comparer, or null if no options were specified.
+        /// </summary>
+        public IObjectTreeCompareOptions Options { get; }
 
         #region EqualityComparer
 

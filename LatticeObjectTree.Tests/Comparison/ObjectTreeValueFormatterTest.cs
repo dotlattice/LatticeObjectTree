@@ -14,10 +14,8 @@ namespace LatticeObjectTree.Comparison
     {
         [Xunit.Theory]
         [TestCase(2, "2")]
-        [TestCase(2f, "2f")]
         [TestCase(2.0f, "2f")]
         [TestCase(2.123f, "2.123f")]
-        [TestCase(2d, "2d")]
         [TestCase(2.0d, "2d")]
         [TestCase(2.123d, "2.123d")]
         [TestCase("", "\"\"")]

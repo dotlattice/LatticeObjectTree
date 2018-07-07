@@ -16,9 +16,42 @@ namespace LatticeObjectTree.Comparison
         public static ObjectTreeValueEqualityComparer Instance { get; } = new ObjectTreeValueEqualityComparer();
 
         /// <summary>
+        /// Creates an equality comparer, or returns <see cref="Instance"/> if the options are null.
+        /// </summary>
+        public static ObjectTreeValueEqualityComparer Create(IObjectTreeCompareOptions options)
+        {
+            if (options == null) return Instance;
+            return new ObjectTreeValueEqualityComparer(options);
+        }
+
+        /// <summary>
         /// The default constructor (for subclasses).
         /// </summary>
         protected ObjectTreeValueEqualityComparer() { }
+
+        /// <summary>
+        /// Constructs a comparer with the specified options.
+        /// </summary>
+        /// <param name="options">the options to use in the comparison</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="options"/> is null</exception>
+        public ObjectTreeValueEqualityComparer(IObjectTreeCompareOptions options)
+        {
+            if (options == null) throw new ArgumentNullException(nameof(options));
+            this.Options = options;
+        }
+
+        /// <summary>
+        /// The options used in this comparer, or null if no options are specified.
+        /// </summary>
+        public IObjectTreeCompareOptions Options { get; }
+
+        /// <summary>
+        /// Always returns true.
+        /// </summary>
+        public virtual bool CanCompare(Type expectedType, Type actualType)
+        {
+            return true;
+        }
 
         /// <summary>
         /// Returns true if the expected and actual values are equal.
@@ -42,11 +75,30 @@ namespace LatticeObjectTree.Comparison
             var type = Nullable.GetUnderlyingType(expectedType) ?? expectedType;
             if (type == typeof(float))
             {
-                return Math.Abs((float)expected - (float)actual) < float.Epsilon;
+                var delta = Options?.FloatComparisonDelta ?? float.Epsilon;
+                return Math.Abs((float)expected - (float)actual) <= delta;
             }
             else if (type == typeof(double))
             {
-                return Math.Abs((double)expected - (double)actual) < double.Epsilon;
+                var delta = Options?.DoubleComparisonDelta ?? double.Epsilon;
+                return Math.Abs((double)expected - (double)actual) <= double.Epsilon;
+            }
+            else if (type == typeof(decimal) && (Options?.DecimalComparisonDelta).HasValue)
+            {
+                var delta = Options.DecimalComparisonDelta.Value;
+                return Math.Abs((decimal)expected - (decimal)actual) <= delta;
+            }
+            else if (type == typeof(DateTime) && (Options?.DateTimeComparisonDelta).HasValue)
+            {
+                var expectedDt = (DateTime)expected;
+                var actualDt = (DateTime)actual;
+                return Math.Abs(expectedDt.Ticks - actualDt.Ticks) <= Options.DateTimeComparisonDelta.Value.Ticks;
+            }
+            else if (type == typeof(DateTimeOffset) && (Options?.DateTimeComparisonDelta).HasValue)
+            {
+                var expectedDto = (DateTimeOffset)expected;
+                var actualDto = (DateTimeOffset)actual;
+                return Math.Abs(expectedDto.Ticks - actualDto.Ticks) <= Options.DateTimeComparisonDelta.Value.Ticks;
             }
             else if (type == typeof(byte[]))
             {
@@ -70,6 +122,7 @@ namespace LatticeObjectTree.Comparison
             // Special handling for a few types
             var type = obj.GetType();
             type = Nullable.GetUnderlyingType(type) ?? type;
+
             if (type == typeof(byte[]))
             {
                 var elements = (byte[])obj;

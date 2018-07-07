@@ -14,7 +14,7 @@ namespace LatticeObjectTree
         /// </summary>
         /// <param name="rootObject">the root object of the tree</param>
         public ObjectTree(object rootObject)
-            : this(CreateRootNode(rootObject)) { }
+            : this(rootObject, options: default(IObjectTreeOptions)) { }
 
         /// <summary>
         /// Constructs an object tree with the specified root object and filter on the descendant nodes to include in the tree.
@@ -23,6 +23,14 @@ namespace LatticeObjectTree
         /// <param name="nodeFilter">a filter on which descendant nodes will be included in the tree</param>
         public ObjectTree(object rootObject, IObjectTreeNodeFilter nodeFilter)
             : this(CreateRootNode(rootObject, nodeFilter)) { }
+
+        /// <summary>
+        /// Constructs an object tree with the specified root object and filter on the descendant nodes to include in the tree.
+        /// </summary>
+        /// <param name="rootObject">the root object of the tree</param>
+        /// <param name="options">(optional) options that control how the object tree is built</param>
+        public ObjectTree(object rootObject, IObjectTreeOptions options)
+            : this(CreateRootNode(rootObject, options)) { }
 
         /// <summary>
         /// Constructs an object tree with the specified root node.
@@ -66,13 +74,12 @@ namespace LatticeObjectTree
         /// <returns>the object tree representation of the specified root object with the specified filter applied to its descendant nodes</returns>
         public static ObjectTree Create(object rootObject, IObjectTreeNodeFilter nodeFilter)
         {
-            if (nodeFilter == null)
-            {
-                return Create(rootObject);
-            }
-
             var objectTree = rootObject as ObjectTree;
-            if (objectTree != null)
+            if (objectTree == null)
+            {
+                objectTree = new ObjectTree(rootObject, nodeFilter);
+            }
+            else
             {
                 var rootNode = CreateRootNode(objectTree.RootNode, nodeFilter);
                 if (rootNode != objectTree.RootNode)
@@ -80,48 +87,80 @@ namespace LatticeObjectTree
                     objectTree = new ObjectTree(rootNode);
                 }
             }
-
-            if (objectTree == null)
-            {
-                objectTree = new ObjectTree(rootObject, nodeFilter);
-            }
-
             return objectTree;
         }
 
-        private static ObjectTreeNode CreateRootNode(object rootObject)
+        /// <summary>
+        /// Creates an object tree for the specified root object and options, or just returns 
+        /// the object if it's an <see cref="ObjectTree"/> that already uses these options.
+        /// </summary>
+        /// <param name="rootObject">the object that represents the root of the tree, or the tree</param>
+        /// <param name="options">(optional) options that control how the object tree is built</param>
+        /// <returns>the object tree representation of the specified root object with the specified filter applied to its descendant nodes</returns>
+        public static ObjectTree Create(object rootObject, IObjectTreeOptions options)
         {
-            var node = rootObject as ObjectTreeNode;
-            if (node == null)
+            var objectTree = rootObject as ObjectTree;
+            if(objectTree == null)
             {
-                var defaultSpawnStrategy = new DuplicateCheckingObjectTreeSpawnStrategy();
-                node = defaultSpawnStrategy.CreateRootNode(rootObject);
+                objectTree = new ObjectTree(rootObject, options);
             }
-            return node;
+            else
+            {
+                var rootNode = CreateRootNode(objectTree.RootNode, options);
+                if (rootNode != objectTree.RootNode)
+                {
+                    objectTree = new ObjectTree(rootNode);
+                }
+            }
+            return objectTree;
         }
 
         private static ObjectTreeNode CreateRootNode(object rootObject, IObjectTreeNodeFilter nodeFilter)
         {
-            if (nodeFilter == null)
+            if (nodeFilter != null && rootObject is ObjectTreeNode rootNode)
             {
-                return CreateRootNode(rootObject);
-            }
-
-            var rootNode = rootObject as ObjectTreeNode;
-            if (rootNode != null)
-            {
-                var filteredSpawnStrategy = rootNode.SpawnStrategy as FilteredObjectTreeSpawnStrategy;
-                if (filteredSpawnStrategy == null || filteredSpawnStrategy.Filter != nodeFilter)
+                var rootNodeSpawnStrategy = rootNode.SpawnStrategy;
+                var basicSpawnStrategy = rootNodeSpawnStrategy as BasicObjectTreeSpawnStrategy
+                    ?? (rootNodeSpawnStrategy as DuplicateCheckingObjectTreeSpawnStrategy)?.BackingSpawnStrategy as BasicObjectTreeSpawnStrategy;
+                if (basicSpawnStrategy != null && basicSpawnStrategy.Options?.NodeFilter == nodeFilter)
                 {
-                    filteredSpawnStrategy = new FilteredObjectTreeSpawnStrategy(nodeFilter, rootNode.SpawnStrategy);
-                    rootNode = filteredSpawnStrategy.CreateRootNode(rootNode.Value);
+                    return CreateRootNode(rootObject, basicSpawnStrategy.Options);
                 }
             }
+            IObjectTreeOptions options = nodeFilter != null ? new ObjectTreeOptions { NodeFilter = nodeFilter } : default(IObjectTreeOptions);
+            return CreateRootNode(rootObject, options);
+        }
 
+        private static ObjectTreeNode CreateRootNode(object rootObject, IObjectTreeOptions options)
+        {
+            var rootNode = rootObject as ObjectTreeNode;
             if (rootNode == null)
             {
-                var filteredSpawnStrategy = new FilteredObjectTreeSpawnStrategy(nodeFilter);
-                rootNode = filteredSpawnStrategy.CreateRootNode(rootObject);
+                var defaultSpawnStrategy = options?.DefaultSpawnStrategy ?? new DuplicateCheckingObjectTreeSpawnStrategy(options);
+                rootNode = defaultSpawnStrategy.CreateRootNode(rootObject);
+            }
+            else if (options != null)
+            {
+                var rootNodeSpawnStrategy = rootNode.SpawnStrategy;
+
+                bool canReuseNode;
+                if (options.DefaultSpawnStrategy != null)
+                {
+                    canReuseNode = Equals(rootNodeSpawnStrategy, options.DefaultSpawnStrategy)
+                        || rootNodeSpawnStrategy.GetType() == options.DefaultSpawnStrategy.GetType();
+                }
+                else
+                {
+                    var basicSpawnStrategy = rootNodeSpawnStrategy as BasicObjectTreeSpawnStrategy
+                        ?? (rootNodeSpawnStrategy as DuplicateCheckingObjectTreeSpawnStrategy)?.BackingSpawnStrategy as BasicObjectTreeSpawnStrategy;
+                    canReuseNode = (basicSpawnStrategy != null && Equals(basicSpawnStrategy.Options, options));
+                }
+
+                if (!canReuseNode)
+                {
+                    var defaultSpawnStrategy = new DuplicateCheckingObjectTreeSpawnStrategy(options);
+                    rootNode = defaultSpawnStrategy.CreateRootNode(rootNode.Value);
+                }
             }
             return rootNode;
         }

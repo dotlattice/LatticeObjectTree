@@ -86,5 +86,19 @@ namespace LatticeObjectTree
                 || type == typeof(long)
                 || type == typeof(ulong);
         }
+
+        public static bool IsCollection(Type valueType)
+        {
+            if (valueType == typeof(string) || IsDictionary(valueType))
+            {
+                return false;
+            }
+            return IsAssignableFrom(typeof(System.Collections.IEnumerable), valueType);
+        }
+
+        public static bool IsDictionary(Type valueType)
+        {
+            return IsAssignableFrom(typeof(System.Collections.IDictionary), valueType);
+        }
     }
 }

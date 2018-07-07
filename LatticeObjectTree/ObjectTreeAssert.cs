@@ -21,7 +21,7 @@ namespace LatticeObjectTree
         /// <exception cref="ObjectTreeEqualException">if the two objects are not equal</exception>
         public static void AreEqual(object expected, object actual)
         {
-            AreEqual(expected, actual, nodeFilter: null);
+            AreEqual(expected, actual, options: null);
         }
 
         /// <summary>
@@ -34,9 +34,23 @@ namespace LatticeObjectTree
         /// <exception cref="ObjectTreeEqualException">if the two objects are not equal</exception>
         public static void AreEqual(object expected, object actual, IObjectTreeNodeFilter nodeFilter)
         {
-            var expectedTree = ObjectTree.Create(expected, nodeFilter);
-            var actualTree = ObjectTree.Create(actual, nodeFilter);
-            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(expectedTree, actualTree);
+            var options = nodeFilter != null ? new ObjectTreeCompareOptions { NodeFilter = nodeFilter } : default(IObjectTreeCompareOptions);
+            AreEqual(expected, actual, options: options);
+        }
+
+        /// <summary>
+        /// Verifies that two objects are equal based on their filtered object tree representations. 
+        /// If they are not, an <see cref="ObjectTreeEqualException"/> is thrown.
+        /// </summary>
+        /// <param name="expected">the expected object</param>
+        /// <param name="actual">the actual object</param>
+        /// <param name="options">(optional) options that control the comparison</param>
+        /// <exception cref="ObjectTreeEqualException">if the two objects are not equal</exception>
+        public static void AreEqual(object expected, object actual, IObjectTreeCompareOptions options)
+        {
+            var expectedTree = ObjectTree.Create(expected, options);
+            var actualTree = ObjectTree.Create(actual, options);
+            var differences = ObjectTreeEqualityComparer.Create(options).FindDifferences(expectedTree, actualTree);
             if (differences.Any())
             {
                 throw new ObjectTreeEqualException(expectedTree, actualTree, differences);
@@ -52,7 +66,7 @@ namespace LatticeObjectTree
         /// <exception cref="ObjectTreeNotEqualException">if the two objects are equal</exception>
         public static void AreNotEqual(object expected, object actual)
         {
-            AreNotEqual(expected, actual, nodeFilter: null);
+            AreNotEqual(expected, actual, options: null);
         }
 
         /// <summary>
@@ -65,9 +79,23 @@ namespace LatticeObjectTree
         /// <exception cref="ObjectTreeNotEqualException">if the two objects are equal</exception>
         public static void AreNotEqual(object expected, object actual, IObjectTreeNodeFilter nodeFilter)
         {
-            var expectedTree = ObjectTree.Create(expected, nodeFilter);
-            var actualTree = ObjectTree.Create(actual, nodeFilter);
-            var differences = ObjectTreeEqualityComparer.Instance.FindDifferences(expectedTree, actualTree);
+            var options = nodeFilter != null ? new ObjectTreeCompareOptions { NodeFilter = nodeFilter } : default(IObjectTreeCompareOptions);
+            AreNotEqual(expected, actual, options: options);
+        }
+
+        /// <summary>
+        /// Verifies that two objects are not equal based on their filtered object tree representations. 
+        /// If they are equal, an <see cref="ObjectTreeNotEqualException"/> is thrown.
+        /// </summary>
+        /// <param name="expected">the expected object</param>
+        /// <param name="actual">the actual object</param>
+        /// <param name="options">(optional) options that control the comparison</param>
+        /// <exception cref="ObjectTreeNotEqualException">if the two objects are equal</exception>
+        public static void AreNotEqual(object expected, object actual, IObjectTreeCompareOptions options)
+        {
+            var expectedTree = ObjectTree.Create(expected, options);
+            var actualTree = ObjectTree.Create(actual, options);
+            var differences = ObjectTreeEqualityComparer.Create(options).FindDifferences(expectedTree, actualTree);
             if (!differences.Any())
             {
                 throw new ObjectTreeNotEqualException(expectedTree, actualTree);

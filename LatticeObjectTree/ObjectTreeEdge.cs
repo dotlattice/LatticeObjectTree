@@ -14,7 +14,7 @@ namespace LatticeObjectTree
         /// Constructs an empty edge.
         /// </summary>
         public ObjectTreeEdge()
-            : this(member: null, index: default(int?))
+            : this(member: null, index: default(int?), key: null)
         { }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace LatticeObjectTree
         /// <param name="member">the member used to access the node from its parent</param>
         /// <exception cref="ArgumentNullException">if the member is null</exception>
         public ObjectTreeEdge(MemberInfo member)
-            : this(member: member, index: default(int?))
+            : this(member: member, index: default(int?), key: member?.Name)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
         }
@@ -34,20 +34,30 @@ namespace LatticeObjectTree
         /// <param name="index">the index of the element in a list</param>
         /// <exception cref="ArgumentOutOfRangeException">if the index is negative</exception>
         public ObjectTreeEdge(int index)
-            : this(member: null, index: index)
+            : this(member: null, index: index, key: index)
         {
             if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), index, $"{nameof(index)} cannot be negative");
         }
+
+        /// <summary>
+        /// Constructs an edge for the specified key (such as a dictionary entry key).
+        /// </summary>
+        /// <param name="key">the key of the entry in a dictionary</param>
+        public ObjectTreeEdge(object key)
+            : this(member: null, index: default(int?), key: key) { }
+
 
         /// <summary>
         /// Constructs an edge for the specified member and/or index.
         /// </summary>
         /// <param name="member">the member used to access the node from its parent</param>
         /// <param name="index">the index of the element in a list</param>
-        protected ObjectTreeEdge(MemberInfo member, int? index)
+        /// <param name="key">the key of the element in a dictionary or list</param>
+        protected ObjectTreeEdge(MemberInfo member, int? index, object key)
         {
             this.Member = member;
             this.Index = index;
+            this.Key = key;
         }
 
         /// <summary>
@@ -85,6 +95,12 @@ namespace LatticeObjectTree
         /// The index to this node (for something like an array or other collection), or null if there is no index associated with this edge.
         /// </summary>
         public int? Index { get; }
+
+        /// <summary>
+        /// The key to this node, or null if there is no key associated with this edge.
+        /// This may be the same as <see cref="Index"/> or the <see cref="MemberInfo.Name"/> of the <see cref="Member"/>.
+        /// </summary>
+        public object Key { get; }
 
         /// <summary>
         /// Tries to resolve this edge on the specified parent object.
@@ -155,6 +171,22 @@ namespace LatticeObjectTree
                     return false;
                 }
             }
+            else if (node.Key != null)
+            {
+                if (parentObject == null)
+                {
+                    return false;
+                }
+
+                if (parentObject is System.Collections.IDictionary parentDictionary && parentDictionary.Contains(node.Key))
+                {
+                    value = parentDictionary[node.Key];
+                }
+                else
+                {
+                    return false;
+                }
+            }
             else
             {
                 value = parentObject;
@@ -177,6 +209,10 @@ namespace LatticeObjectTree
             else if (Index.HasValue)
             {
                 return "[" + Index.Value + "]";
+            }
+            else if (Key != null)
+            {
+                return "[" + Key.ToString() + "]";
             }
             else
             {

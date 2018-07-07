@@ -55,8 +55,9 @@ namespace LatticeObjectTree
             Assert.AreEqual("test", filteredTree.RootNode.Value);
             Assert.AreEqual(0, filteredTree.RootNode.ChildNodes.Count());
 
-            Assert.IsInstanceOf<FilteredObjectTreeSpawnStrategy>(filteredTree.RootNode.SpawnStrategy);
-            Assert.AreSame(filter, ((FilteredObjectTreeSpawnStrategy)filteredTree.RootNode.SpawnStrategy).Filter);
+            var spawnStrategy = filteredTree.RootNode.SpawnStrategy as DuplicateCheckingObjectTreeSpawnStrategy;
+            var backingSpawnStrategy = spawnStrategy?.BackingSpawnStrategy as BasicObjectTreeSpawnStrategy;
+            Assert.AreSame(filter, backingSpawnStrategy.Options?.NodeFilter);
         }
 
         [Test]
@@ -71,8 +72,9 @@ namespace LatticeObjectTree
             Assert.AreEqual("test", filteredTree.RootNode.Value);
             Assert.AreEqual(0, filteredTree.RootNode.ChildNodes.Count());
 
-            Assert.IsInstanceOf<FilteredObjectTreeSpawnStrategy>(filteredTree.RootNode.SpawnStrategy);
-            Assert.AreSame(filter, ((FilteredObjectTreeSpawnStrategy)filteredTree.RootNode.SpawnStrategy).Filter);
+            var spawnStrategy = filteredTree.RootNode.SpawnStrategy as DuplicateCheckingObjectTreeSpawnStrategy;
+            var backingSpawnStrategy = spawnStrategy?.BackingSpawnStrategy as BasicObjectTreeSpawnStrategy;
+            Assert.AreSame(filter, backingSpawnStrategy.Options?.NodeFilter);
         }
 
         [Test]
@@ -88,8 +90,9 @@ namespace LatticeObjectTree
             Assert.AreEqual("test", filteredTree.RootNode.Value);
             Assert.AreEqual(0, filteredTree.RootNode.ChildNodes.Count());
 
-            Assert.IsInstanceOf<FilteredObjectTreeSpawnStrategy>(filteredTree.RootNode.SpawnStrategy);
-            Assert.AreSame(newFilter, ((FilteredObjectTreeSpawnStrategy)filteredTree.RootNode.SpawnStrategy).Filter);
+            var spawnStrategy = filteredTree.RootNode.SpawnStrategy as DuplicateCheckingObjectTreeSpawnStrategy;
+            var backingSpawnStrategy = spawnStrategy?.BackingSpawnStrategy as BasicObjectTreeSpawnStrategy;
+            Assert.AreSame(newFilter, backingSpawnStrategy.Options?.NodeFilter);
         }
 
         [Test]
