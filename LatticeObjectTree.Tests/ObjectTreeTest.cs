@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Threading;
 
 namespace LatticeObjectTree
 {
@@ -362,6 +362,9 @@ namespace LatticeObjectTree
                 TypeToStringFunc = (Type t) => t.FullName,
                 Field = typeof(string).GetRuntimeField("Empty"),
                 Property = typeof(string).GetRuntimeProperty("Length"),
+                Task = Task.CompletedTask,
+                CancellationToken = CancellationToken.None,
+                CancellationTokenSource = new CancellationTokenSource(),
             };
 
             var objectTree = new ObjectTree(obj);
@@ -371,7 +374,7 @@ namespace LatticeObjectTree
             Assert.AreEqual(ObjectTreeNodeType.Object, rootNode.NodeType);
 
             var childNodes = objectTree.RootNode.ChildNodes.ToList();
-            Assert.AreEqual(4, childNodes.Count);
+            Assert.AreEqual(7, childNodes.Count);
 
             Assert.AreEqual("Type", GetEdgeFromNode(childNodes.ElementAt(0)).Property.Name);
             Assert.AreSame(obj.Type, childNodes.ElementAt(0).Value);
@@ -392,6 +395,55 @@ namespace LatticeObjectTree
             Assert.AreSame(obj.Property, childNodes.ElementAt(3).Value);
             Assert.AreEqual(0, childNodes.ElementAt(3).ChildNodes.Count());
             Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(3).NodeType);
+
+            Assert.AreEqual("Task", GetEdgeFromNode(childNodes.ElementAt(4)).Property.Name);
+            Assert.AreSame(obj.Task, childNodes.ElementAt(4).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(4).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(4).NodeType);
+
+            Assert.AreEqual("CancellationToken", GetEdgeFromNode(childNodes.ElementAt(5)).Property.Name);
+            Assert.AreEqual(obj.CancellationToken, childNodes.ElementAt(5).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(5).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(5).NodeType);
+
+            Assert.AreEqual("CancellationTokenSource", GetEdgeFromNode(childNodes.ElementAt(6)).Property.Name);
+            Assert.AreEqual(obj.CancellationTokenSource, childNodes.ElementAt(6).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(6).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Unknown, childNodes.ElementAt(6).NodeType);
+        }
+
+        [Test]
+        public void Construct_SampleObject8_PublicConstField()
+        {
+            var obj = new SampleObject8();
+
+            var objectTree = new ObjectTree(obj);
+
+            var rootNode = objectTree.RootNode;
+            Assert.AreSame(obj, rootNode.Value);
+            Assert.AreEqual(ObjectTreeNodeType.Object, rootNode.NodeType);
+
+            var childNodes = objectTree.RootNode.ChildNodes.ToList();
+            Assert.AreEqual(0, childNodes.Count);
+        }
+
+        [Test]
+        public void Construct_SampleObject9_PrimitiveValues()
+        {
+            var obj = SampleObject9.CreateSample();
+
+            var objectTree = new ObjectTree(obj);
+
+            var rootNode = objectTree.RootNode;
+            Assert.AreSame(obj, rootNode.Value);
+            Assert.AreEqual(ObjectTreeNodeType.Object, rootNode.NodeType);
+
+            var childNodes = objectTree.RootNode.ChildNodes.ToList();
+            Assert.AreEqual(34, childNodes.Count);
+            for (var i = 0; i < childNodes.Count; i++)
+            {
+                Assert.AreEqual(ObjectTreeNodeType.Primitive, childNodes[i].NodeType);
+            }
         }
 
         [Test]
@@ -415,6 +467,36 @@ namespace LatticeObjectTree
             Assert.AreEqual(2, rootNode.ChildNodes.ElementAt(1).Value);
             Assert.AreEqual(ObjectTreeNodeType.Primitive, rootNode.ChildNodes.ElementAt(1).NodeType);
             Assert.AreEqual(0, rootNode.ChildNodes.ElementAt(1).ChildNodes.Count());
+        }
+
+        [Test]
+        public void Construct_SampleStruct1()
+        {
+            var obj = new SampleStruct1
+            {
+                IntValue = 2,
+                SampleStruct2 = new SampleStruct2
+                {
+                    StringValue = "two",
+                },
+            };
+
+            var objectTree = new ObjectTree(obj);
+
+            var rootNode = objectTree.RootNode;
+            Assert.AreEqual(ObjectTreeNodeType.Object, rootNode.NodeType);
+
+            var childNodes = objectTree.RootNode.ChildNodes.ToList();
+            Assert.AreEqual(2, childNodes.Count);
+
+            Assert.AreEqual("IntValue", GetEdgeFromNode(childNodes.ElementAt(0)).Property.Name);
+            Assert.AreEqual(obj.IntValue, childNodes.ElementAt(0).Value);
+            Assert.AreEqual(0, childNodes.ElementAt(0).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Primitive, childNodes.ElementAt(0).NodeType);
+
+            Assert.AreEqual("SampleStruct2", GetEdgeFromNode(childNodes.ElementAt(1)).Property.Name);
+            Assert.AreEqual(1, childNodes.ElementAt(1).ChildNodes.Count());
+            Assert.AreEqual(ObjectTreeNodeType.Object, childNodes.ElementAt(1).NodeType);
         }
 
         #region Test Classes
@@ -468,6 +550,105 @@ namespace LatticeObjectTree
             public Func<Type, string> TypeToStringFunc { get; set; }
             public System.Reflection.FieldInfo Field { get; set; }
             public System.Reflection.PropertyInfo Property { get; set; }
+            public Task Task { get; set; }
+            public CancellationToken CancellationToken { get; set; }
+            public CancellationTokenSource CancellationTokenSource { get; set; }
+        }
+
+        private class SampleObject8
+        {
+            public const int ConstIntValue = 2;
+        }
+
+        private class SampleObject9
+        {
+            public static SampleObject9 CreateSample()
+            {
+                return new SampleObject9
+                {
+                    StringValue = "two",
+                    IntValue = 1,
+                    NullableIntValue = 2,
+                    UIntValue = 3,
+                    NullableUIntValue = 4,
+                    LongValue = 5L,
+                    NullableLongValue = 6L,
+                    ULongValue = 7L,
+                    NullableULongValue = 8L,
+                    ShortValue = 9,
+                    NullableShortValue = 10,
+                    UShortValue = 11,
+                    NullableUShortValue = 12,
+                    ByteValue = 13,
+                    NullableByteValue = 14,
+                    SByteValue = 15,
+                    NullableSByteValue = 16,
+                    BoolValue = true,
+                    NullableBoolValue = false,
+                    DecimalValue = 1.1m,
+                    NullableDecimalValue = 2.2m,
+                    DoubleValue = 3.3d,
+                    NullableDoubleValue = 4.4d,
+                    FloatValue = 5.5d,
+                    NullableFloatValue = 6.6d,
+                    DateTimeValue = new DateTime(2000, 1, 1, 12, 1, 2),
+                    NullableDateTimeValue = new DateTime(2000, 1, 2, 12, 1, 2),
+                    DateTimeOffsetValue = new DateTimeOffset(2000, 1, 3, 12, 1, 2, TimeSpan.Zero),
+                    NullableDateTimeOffsetValue = new DateTimeOffset(2000, 1, 4, 12, 1, 2, TimeSpan.Zero),
+                    TimeSpanValue = TimeSpan.FromHours(1),
+                    NullableTimeSpanValue = TimeSpan.FromHours(2),
+                    GuidValue = new Guid("e9e13594-6cb4-45f0-b20b-b4e947161256"),
+                    NullableGuidValue = new Guid("36408fcb-eb6c-4440-95ed-39ec43866347"),
+                    ByteArrayValue = new byte[] { 1, 2, 255 },
+                };
+            }
+
+            public string StringValue { get; set; }
+            public int IntValue { get; set; }
+            public int? NullableIntValue { get; set; }
+            public uint UIntValue { get; set; }
+            public uint? NullableUIntValue { get; set; }
+            public long LongValue { get; set; }
+            public long? NullableLongValue { get; set; }
+            public ulong ULongValue { get; set; }
+            public ulong? NullableULongValue { get; set; }
+            public short ShortValue { get; set; }
+            public short? NullableShortValue { get; set; }
+            public ushort UShortValue { get; set; }
+            public ushort? NullableUShortValue { get; set; }
+            public byte ByteValue { get; set; }
+            public byte? NullableByteValue { get; set; }
+            public sbyte SByteValue { get; set; }
+            public sbyte? NullableSByteValue { get; set; }
+            public bool BoolValue { get; set; }
+            public bool? NullableBoolValue { get; set; }
+            public decimal DecimalValue { get; set; }
+            public decimal? NullableDecimalValue { get; set; }
+            public double DoubleValue { get; set; }
+            public double? NullableDoubleValue { get; set; }
+            public double FloatValue { get; set; }
+            public double? NullableFloatValue { get; set; }
+            public DateTime DateTimeValue { get; set; }
+            public DateTime? NullableDateTimeValue { get; set; }
+            public DateTimeOffset DateTimeOffsetValue { get; set; }
+            public DateTimeOffset? NullableDateTimeOffsetValue { get; set; }
+            public TimeSpan TimeSpanValue { get; set; }
+            public TimeSpan? NullableTimeSpanValue { get; set; }
+            public Guid GuidValue { get; set; }
+            public Guid? NullableGuidValue { get; set; }
+            public byte[] ByteArrayValue { get; set; }
+        }
+
+
+        private struct SampleStruct1
+        {
+            public int IntValue { get; set; }
+            public SampleStruct2 SampleStruct2 { get; set; }
+        }
+
+        private struct SampleStruct2
+        {
+            public string StringValue { get; set; }
         }
 
         #endregion

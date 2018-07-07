@@ -267,6 +267,7 @@ namespace LatticeObjectTree
         {
             bool isPrimitive = TypeUtils.IsPrimitive(valueType)
                 || valueType == typeof(string)
+                || valueType == typeof(decimal)
                 || valueType == typeof(Guid)
                 || valueType == typeof(DateTime)
                 || valueType == typeof(DateTimeOffset)
@@ -288,8 +289,8 @@ namespace LatticeObjectTree
                 return true;
             }
 
-            return (valueType.Namespace == "System" || valueType.Namespace == "System.Reflection")
-                && !TypeUtils.IsValueType(valueType)
+            return (valueType.Namespace == "System" || valueType.Namespace == "System.Reflection" || valueType.Namespace == "System.Threading" || valueType.Namespace == "System.Threading.Tasks")
+                && (!TypeUtils.IsValueType(valueType) || valueType.Name == "CancellationToken")
                 && !valueType.IsArray;
         }
 
@@ -360,6 +361,7 @@ namespace LatticeObjectTree
             );
             var fieldChildNodes = (
                 from field in TypeUtils.GetFields(parentValueType)
+                where !MemberInfoUtils.IsConstantField(field)
                 let childValue = GetFieldValue(field, value)
                 let edgeFromParent = new ObjectTreeEdge(field)
                 let nodeType = DetermineNodeType(childValue, parentNode, edgeFromParent)

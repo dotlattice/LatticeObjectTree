@@ -206,10 +206,11 @@ namespace LatticeObjectTree.Comparison
         private IEnumerable<ObjectTreeNodeDifference> FindDifferencesRecursive(ObjectTreeNode expectedNode, ObjectTreeNode actualNode, int level)
         {
             // Protection from inifinite recursion
-            const int maxLevel = 1000;
+            const int maxLevel = 500;
             if (level > maxLevel)
             {
-                throw new ObjectTreeCircularReferenceException($"Exceeded max nested object level of {maxLevel}");
+                var partialPath = new ObjectTreeEdgePath(expectedNode.ToEdgePath().Edges.Take(20));
+                throw new ObjectTreeCircularReferenceException($"Exceeded max nested object level of {maxLevel} at path {partialPath.ToString()}...");
             }
 
             if (expectedNode == null) throw new ArgumentNullException(nameof(expectedNode));

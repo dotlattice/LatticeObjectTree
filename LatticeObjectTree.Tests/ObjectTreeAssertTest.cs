@@ -463,7 +463,7 @@ namespace LatticeObjectTree
                 Enumerable = new List<string> { "test" },
                 ReadOnlyCollection = new List<string> { "test2", "test22" },
                 Collection = new List<string> { "test3" },
-                Array = new [] { "test4" },
+                Array = new[] { "test4" },
                 IList = new List<string> { "test5" },
                 List = new List<string> { "test6" },
             };
@@ -605,6 +605,14 @@ namespace LatticeObjectTree
         {
             var obj1 = new string[0];
             var obj2 = new string[0];
+            AssertAreEqual(obj1, obj2);
+        }
+
+        [Test]
+        public void PrimitiveValuesObject_Sample_AreEqual()
+        {
+            var obj1 = PrimitiveValuesObject.CreateSample();
+            var obj2 = PrimitiveValuesObject.CreateSample();
             AssertAreEqual(obj1, obj2);
         }
 
@@ -821,6 +829,85 @@ namespace LatticeObjectTree
 
             public PropertyInfo PropertyInfo { get; set; }
             public PropertyInfo PropertyInfoGetOnly => PropertyInfo;
+        }
+
+        private class PrimitiveValuesObject
+        {
+            public static PrimitiveValuesObject CreateSample()
+            {
+                return new PrimitiveValuesObject
+                {
+                    StringValue = "two",
+                    IntValue = 1,
+                    NullableIntValue = 2,
+                    UIntValue = 3,
+                    NullableUIntValue = 4,
+                    LongValue = 5L,
+                    NullableLongValue = 6L,
+                    ULongValue = 7L,
+                    NullableULongValue = 8L,
+                    ShortValue = 9,
+                    NullableShortValue = 10,
+                    UShortValue = 11,
+                    NullableUShortValue = 12,
+                    ByteValue = 13,
+                    NullableByteValue = 14,
+                    SByteValue = 15,
+                    NullableSByteValue = 16,
+                    BoolValue = true,
+                    NullableBoolValue = false,
+                    DecimalValue = 1.1m,
+                    NullableDecimalValue = 2.2m,
+                    DoubleValue = 3.3d,
+                    NullableDoubleValue = 4.4d,
+                    FloatValue = 5.5d,
+                    NullableFloatValue = 6.6d,
+                    DateTimeValue = new DateTime(2000, 1, 1, 12, 1, 2),
+                    NullableDateTimeValue = new DateTime(2000, 1, 2, 12, 1, 2),
+                    DateTimeOffsetValue = new DateTimeOffset(2000, 1, 3, 12, 1, 2, TimeSpan.Zero),
+                    NullableDateTimeOffsetValue = new DateTimeOffset(2000, 1, 4, 12, 1, 2, TimeSpan.Zero),
+                    TimeSpanValue = TimeSpan.FromHours(1),
+                    NullableTimeSpanValue = TimeSpan.FromHours(2),
+                    GuidValue = new Guid("e9e13594-6cb4-45f0-b20b-b4e947161256"),
+                    NullableGuidValue = new Guid("36408fcb-eb6c-4440-95ed-39ec43866347"),
+                    ByteArrayValue = new byte[] { 1, 2, 255 },
+                };
+            }
+
+            public string StringValue { get; set; }
+            public int IntValue { get; set; }
+            public int? NullableIntValue { get; set; }
+            public uint UIntValue { get; set; }
+            public uint? NullableUIntValue { get; set; }
+            public long LongValue { get; set; }
+            public long? NullableLongValue { get; set; }
+            public ulong ULongValue { get; set; }
+            public ulong? NullableULongValue { get; set; }
+            public short ShortValue { get; set; }
+            public short? NullableShortValue { get; set; }
+            public ushort UShortValue { get; set; }
+            public ushort? NullableUShortValue { get; set; }
+            public byte ByteValue { get; set; }
+            public byte? NullableByteValue { get; set; }
+            public sbyte SByteValue { get; set; }
+            public sbyte? NullableSByteValue { get; set; }
+            public bool BoolValue { get; set; }
+            public bool? NullableBoolValue { get; set; }
+            public decimal DecimalValue { get; set; }
+            public decimal? NullableDecimalValue { get; set; }
+            public double DoubleValue { get; set; }
+            public double? NullableDoubleValue { get; set; }
+            public double FloatValue { get; set; }
+            public double? NullableFloatValue { get; set; }
+            public DateTime DateTimeValue { get; set; }
+            public DateTime? NullableDateTimeValue { get; set; }
+            public DateTimeOffset DateTimeOffsetValue { get; set; }
+            public DateTimeOffset? NullableDateTimeOffsetValue { get; set; }
+            public TimeSpan TimeSpanValue { get; set; }
+            public TimeSpan? NullableTimeSpanValue { get; set; }
+            public Guid GuidValue { get; set; }
+            public Guid? NullableGuidValue { get; set; }
+            public byte[] ByteArrayValue { get; set; }
         }
 
         #endregion
